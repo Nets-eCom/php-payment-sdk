@@ -49,7 +49,6 @@ class PaymentApi
 
     public function __construct(
         private readonly HttpClient $client,
-        private readonly string $baseUrl,
     ) {
     }
 
@@ -59,7 +58,7 @@ class PaymentApi
     public function createPayment(Payment $payment): PaymentWithHostedCheckoutResult
     {
         try {
-            $response = $this->client->post($this->getPaymentsUrl(), json_encode($payment));
+            $response = $this->client->post(self::PAYMENTS_ENDPOINT, json_encode($payment));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 'Couldn\'t create payment',
@@ -84,7 +83,7 @@ class PaymentApi
     public function retrievePayment(string $paymentId): RetrievePaymentResult
     {
         try {
-            $response = $this->client->get(\sprintf('%s/%s', $this->getPaymentsUrl(), $paymentId));
+            $response = $this->client->get(\sprintf('%s/%s', self::PAYMENTS_ENDPOINT, $paymentId));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 \sprintf('Couldn\'t retrieve payment for a given id: %s', $paymentId),
@@ -109,7 +108,7 @@ class PaymentApi
     public function cancel(string $paymentId, Cancel $cancel): void
     {
         try {
-            $response = $this->client->post($this->getPaymentOperationEndpoint($paymentId, self::PAYMENT_CANCELS), json_encode($cancel));
+            $response = $this->client->post($this->getPaymentOperationPath($paymentId, self::PAYMENT_CANCELS), json_encode($cancel));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 \sprintf('Couldn\'t cancel for a given payment id: %s', $paymentId),
@@ -130,7 +129,7 @@ class PaymentApi
     {
         try {
             $response = $this->client->put(
-                $this->getPaymentOperationEndpoint($paymentId, self::PAYMENT_UPDATE_REFERENCE_INFORMATION),
+                $this->getPaymentOperationPath($paymentId, self::PAYMENT_UPDATE_REFERENCE_INFORMATION),
                 json_encode($referenceInformation)
             );
         } catch (HttpClientException $httpClientException) {
@@ -157,7 +156,7 @@ class PaymentApi
     {
         try {
             $response = $this->client->put(
-                $this->getPaymentOperationEndpoint($paymentId, self::PAYMENT_UPDATE_MY_REFERENCE),
+                $this->getPaymentOperationPath($paymentId, self::PAYMENT_UPDATE_MY_REFERENCE),
                 json_encode($myReference)
             );
         } catch (HttpClientException $httpClientException) {
@@ -185,7 +184,7 @@ class PaymentApi
     ): void {
         try {
             $response = $this->client->put(
-                $this->getPaymentOperationEndpoint($paymentId, self::PAYMENT_UPDATE_ORDER),
+                $this->getPaymentOperationPath($paymentId, self::PAYMENT_UPDATE_ORDER),
                 json_encode($updateOrder)
             );
         } catch (HttpClientException $httpClientException) {
@@ -210,7 +209,7 @@ class PaymentApi
     {
         try {
             $response = $this->client->put(
-                $this->getPaymentOperationEndpoint($paymentId, self::PAYMENT_TERMINATE),
+                $this->getPaymentOperationPath($paymentId, self::PAYMENT_TERMINATE),
                 ''
             );
         } catch (HttpClientException $httpClientException) {
@@ -231,7 +230,7 @@ class PaymentApi
     public function charge(string $paymentId, Charge $charge): ChargeResult
     {
         try {
-            $response = $this->client->post($this->getPaymentOperationEndpoint($paymentId, self::PAYMENT_CHARGES), json_encode($charge));
+            $response = $this->client->post($this->getPaymentOperationPath($paymentId, self::PAYMENT_CHARGES), json_encode($charge));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 \sprintf('Couldn\'t create charge for a given payment id: %s', $paymentId),
@@ -257,7 +256,7 @@ class PaymentApi
     {
         try {
             $response = $this->client->post(
-                $this->getChargesOperationEndpoint($chargeId, self::REFUNDS),
+                \sprintf('%s/%s%s', self::CHARGES_ENDPOINT, $chargeId, self::REFUNDS),
                 json_encode($refund)
             );
         } catch (HttpClientException $httpClientException) {
@@ -286,7 +285,7 @@ class PaymentApi
     {
         try {
             $response = $this->client->post(
-                $this->getPaymentOperationEndpoint($paymentId, self::REFUNDS),
+                $this->getPaymentOperationPath($paymentId, self::REFUNDS),
                 json_encode($refundPayment)
             );
         } catch (HttpClientException $httpClientException) {
@@ -315,7 +314,12 @@ class PaymentApi
     {
         try {
             $response = $this->client->post(
-                $this->getPendingRefundsEndpoint($refundId, self::REFUND_CANCELS),
+                \sprintf(
+                    '%s/%s%s',
+                    self::PENDING_REFUNDS_ENDPOINT,
+                    $refundId,
+                    self::REFUND_CANCELS
+                ),
                 ''
             );
         } catch (HttpClientException $httpClientException) {
@@ -333,35 +337,9 @@ class PaymentApi
         }
     }
 
-    private function getPendingRefundsEndpoint(string $refundId, string $operation): string
+    private function getPaymentOperationPath(string $paymentId, string $operation): string
     {
-        return \sprintf(
-            '%s%s/%s%s',
-            $this->baseUrl,
-            self::PENDING_REFUNDS_ENDPOINT,
-            $refundId,
-            $operation
-        );
-    }
-
-    private function getPaymentOperationEndpoint(string $paymentId, string $operation): string
-    {
-        return \sprintf('%s/%s%s', $this->getPaymentsUrl(), $paymentId, $operation);
-    }
-
-    private function getPaymentsUrl(): string
-    {
-        return \sprintf('%s%s', $this->baseUrl, self::PAYMENTS_ENDPOINT);
-    }
-
-    private function getChargesOperationEndpoint(string $paymentId, string $operation): string
-    {
-        return \sprintf('%s/%s%s', $this->getChargesUrl(), $paymentId, $operation);
-    }
-
-    private function getChargesUrl(): string
-    {
-        return \sprintf('%s%s', $this->baseUrl, self::CHARGES_ENDPOINT);
+        return \sprintf('%s/%s%s', self::PAYMENTS_ENDPOINT, $paymentId, $operation);
     }
 
     private function isSuccessCode(int $code): bool

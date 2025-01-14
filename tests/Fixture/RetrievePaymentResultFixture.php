@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Tests\CheckoutApi\Fixture;
+namespace NexiCheckout\Tests\Fixture;
 
 use NexiCheckout\Model\Result\RetrievePayment\Charge;
 use NexiCheckout\Model\Result\RetrievePayment\Checkout;

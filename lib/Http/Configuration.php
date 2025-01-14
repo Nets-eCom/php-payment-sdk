@@ -8,6 +8,7 @@ class Configuration
 {
     public function __construct(
         protected string $secretKey,
+        protected string $baseUrl,
         protected ?string $commercePlatformTag = null,
     ) {
     }
@@ -15,6 +16,11 @@ class Configuration
     public function getSecretKey(): string
     {
         return $this->secretKey;
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
     }
 
     public function getCommercePlatformTag(): ?string

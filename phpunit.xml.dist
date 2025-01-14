@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+    colors="true"
+    executionOrder="random"
+    displayDetailsOnTestsThatTriggerWarnings="true"
+>
+    <testsuites>
+        <testsuite name="Nexi Checkout PHP Test Suite">
+            <directory suffix="Test.php">tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>lib</directory>
+        </include>
+    </source>
+</phpunit>

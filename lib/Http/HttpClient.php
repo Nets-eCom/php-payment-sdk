@@ -24,30 +24,33 @@ class HttpClient
     /**
      * @throws HttpClientException
      */
-    public function get(string $url): ResponseInterface
+    public function get(string $path): ResponseInterface
     {
         return $this->send(
-            $this->createRequest($url, 'GET')->withHeader('Accept', 'application/json')
+            $this->createRequest(
+                $this->createUrl($path),
+                'GET'
+            )->withHeader('Accept', 'application/json')
         );
     }
 
     /**
      * @throws HttpClientException
      */
-    public function post(string $url, string $body): ResponseInterface
+    public function post(string $path, string $body): ResponseInterface
     {
         return $this->send(
-            $this->createRequest($url, 'POST')->withBody($this->streamFactory->createStream($body))
+            $this->createRequest($this->createUrl($path), 'POST')->withBody($this->streamFactory->createStream($body))
         );
     }
 
     /**
      * @throws HttpClientException
      */
-    public function put(string $url, string $body): ResponseInterface
+    public function put(string $path, string $body): ResponseInterface
     {
         return $this->send(
-            $this->createRequest($url, 'PUT')->withBody($this->streamFactory->createStream($body))
+            $this->createRequest($this->createUrl($path), 'PUT')->withBody($this->streamFactory->createStream($body))
         );
     }
 
@@ -81,5 +84,10 @@ class HttpClient
         } catch (ClientExceptionInterface $clientException) {
             throw new HttpClientException($clientException->getMessage(), $clientException->getCode(), $clientException);
         }
+    }
+
+    private function createUrl(string $path): string
+    {
+        return sprintf('%s/%s', $this->configuration->getBaseUrl(), $path);
     }
 }

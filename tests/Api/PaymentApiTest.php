@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Tests\CheckoutApi;
+namespace NexiCheckout\Tests\Api;
 
 use NexiCheckout\Api\Exception\ClientErrorPaymentApiException;
 use NexiCheckout\Api\Exception\PaymentApiException;
@@ -77,9 +77,8 @@ final class PaymentApiTest extends TestCase
                 $this->createPsrClientThrowingException(),
                 $this->createRequestFactoryStub(),
                 $this->createStub(StreamFactoryInterface::class),
-                new Configuration('1234')
+                new Configuration('1234', 'https://api.example.com')
             ),
-            'https://api.example.com/'
         );
 
         $sut->createPayment($this->createPaymentRequest());
@@ -442,9 +441,8 @@ final class PaymentApiTest extends TestCase
                 $this->createPsrClient($response),
                 $this->createRequestFactoryStub(),
                 $streamFactory,
-                new Configuration('1234')
-            ),
-            'https://api.example.com'
+                new Configuration('1234', 'https://api.example.com')
+            )
         );
     }
 

@@ -8,5 +8,5 @@ use NexiCheckout\Http\Configuration;
 
 interface HttpClientConfigurationProviderInterface
 {
-    public function provide(string $secretKey): Configuration;
+    public function provide(string $secretKey, bool $isLiveMode): Configuration;
 }

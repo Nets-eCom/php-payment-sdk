@@ -88,6 +88,6 @@ class HttpClient
 
     private function createUrl(string $path): string
     {
-        return sprintf('%s/%s', $this->configuration->getBaseUrl(), $path);
+        return sprintf('%s%s', $this->configuration->getBaseUrl(), $path);
     }
 }

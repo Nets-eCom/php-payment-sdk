@@ -1,0 +1,4 @@
+/tests export-ignore
+/phpunit.xml.dist export-ignore
+/azure-pipelines.yaml export-ignore
+/.git* export-ignore

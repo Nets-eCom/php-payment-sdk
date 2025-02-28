@@ -43,7 +43,13 @@ class RetrievePaymentResultTest extends TestCase
                 },
                 "created": "2019-08-24T14:15:22Z",
                 "refunds": [],
-                "charges": []
+                "charges": [],
+                "subscription": {
+                  "id": "foo"
+                },
+                "unscheduledSubscription": {
+                  "unscheduledSubscriptionId": "foo"
+                }
             }
         }
 JSON;

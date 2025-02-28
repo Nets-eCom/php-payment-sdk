@@ -23,6 +23,8 @@ class Payment
         private readonly ?PaymentDetails $paymentDetails = null,
         private readonly ?array $refunds = null,
         private readonly ?array $charges = null,
+        private readonly ?Subscription $subscription = null,
+        private readonly ?UnscheduledSubscription $unscheduledSubscription = null,
         private readonly ?string $myReference = null,
     ) {
         $this->status = $this->specifyStatus();
@@ -96,6 +98,21 @@ class Payment
     public function getStatus(): PaymentStatusEnum
     {
         return $this->status;
+    }
+
+    public function getSubscription(): ?Subscription
+    {
+        return $this->subscription;
+    }
+
+    public function getUnscheduledSubscription(): ?UnscheduledSubscription
+    {
+        return $this->unscheduledSubscription;
+    }
+
+    public function isSubscriptionPayment(): bool
+    {
+        return $this->subscription instanceof Subscription || $this->unscheduledSubscription instanceof UnscheduledSubscription;
     }
 
     private function specifyStatus(): PaymentStatusEnum

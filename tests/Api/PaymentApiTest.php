@@ -25,11 +25,6 @@ use NexiCheckout\Model\Request\RefundPayment;
 use NexiCheckout\Model\Request\UpdateOrder;
 use NexiCheckout\Model\Request\UpdateOrder\PaymentMethod;
 use NexiCheckout\Model\Request\UpdateOrder\Shipping;
-use NexiCheckout\Model\Result\ChargeResult;
-use NexiCheckout\Model\Result\Payment\PaymentWithHostedCheckoutResult;
-use NexiCheckout\Model\Result\RefundChargeResult;
-use NexiCheckout\Model\Result\RefundPaymentResult;
-use NexiCheckout\Model\Result\RetrievePaymentResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -41,7 +36,7 @@ use Psr\Http\Message\StreamInterface;
 
 final class PaymentApiTest extends TestCase
 {
-    public function testItCreatesPayment(): void
+    public function testItCreatesHostedPayment(): void
     {
         $stream = $this->createStub(StreamInterface::class);
         $stream
@@ -61,11 +56,34 @@ final class PaymentApiTest extends TestCase
 
         $sut = $this->createPaymentApi($response, $streamFactory);
 
-        $result = $sut->createPayment($this->createPaymentRequest());
+        $result = $sut->createHostedPayment($this->createPaymentRequest());
 
-        $this->assertInstanceOf(PaymentWithHostedCheckoutResult::class, $result);
         $this->assertSame('1234', $result->getPaymentId());
         $this->assertSame('https://api.example.com/hostedUrl', $result->getHostedPaymentPageUrl());
+    }
+
+    public function testItCreatesEmbeddedPayment(): void
+    {
+        $stream = $this->createStub(StreamInterface::class);
+        $stream
+            ->method('getContents')
+            ->willReturn(
+                json_encode([
+                    'paymentId' => '1234',
+                ])
+            );
+
+        $streamFactory = $this->createStreamFactory($stream);
+
+        $response = $this->createStub(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn(200);
+        $response->method('getBody')->willReturn($stream);
+
+        $sut = $this->createPaymentApi($response, $streamFactory);
+
+        $result = $sut->createEmbeddedPayment($this->createPaymentRequest());
+
+        $this->assertSame('1234', $result->getPaymentId());
     }
 
     public function testItThrowsExceptionOnPsrClientExceptionCreatePayment(): void
@@ -81,7 +99,7 @@ final class PaymentApiTest extends TestCase
             ),
         );
 
-        $sut->createPayment($this->createPaymentRequest());
+        $sut->createHostedPayment($this->createPaymentRequest());
     }
 
     public function testItThrowsExceptionOnClientErrorCreatePayment(): void
@@ -106,7 +124,7 @@ final class PaymentApiTest extends TestCase
         $response->method('getBody')->willReturn($stream);
 
         $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
-        $sut->createPayment($this->createPaymentRequest());
+        $sut->createHostedPayment($this->createPaymentRequest());
     }
 
     public function testItThrowsExceptionOnUnsuccessfulCreatePayment(): void
@@ -117,7 +135,7 @@ final class PaymentApiTest extends TestCase
         $response->method('getStatusCode')->willReturn(500);
 
         $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
-        $sut->createPayment($this->createPaymentRequest());
+        $sut->createHostedPayment($this->createPaymentRequest());
     }
 
     public function testItRetrievesPayment(): void
@@ -160,8 +178,10 @@ final class PaymentApiTest extends TestCase
 
         $result = $sut->retrievePayment('1234');
 
-        $this->assertInstanceOf(RetrievePaymentResult::class, $result);
-        $this->assertSame($result->getPayment()->getPaymentId(), '1234');
+        $payment = $result->getPayment();
+
+        $this->assertSame($payment->getPaymentId(), '1234');
+        $this->assertFalse($payment->isSubscriptionPayment());
     }
 
     public function testItThrowsExceptionOnUnknownPaymentRetrieve(): void
@@ -195,7 +215,6 @@ final class PaymentApiTest extends TestCase
 
         $result = $sut->charge('1234', $this->createChargeRequest());
 
-        $this->assertInstanceOf(ChargeResult::class, $result);
         $this->assertSame('1234', $result->getChargeId());
     }
 
@@ -278,7 +297,6 @@ final class PaymentApiTest extends TestCase
 
         $result = $sut->refundCharge('1234', $this->createRefundChargeRequest());
 
-        $this->assertInstanceOf(RefundChargeResult::class, $result);
         $this->assertSame('1234', $result->getRefundId());
     }
 
@@ -301,7 +319,6 @@ final class PaymentApiTest extends TestCase
 
         $result = $sut->refundPayment('1234', $this->createRefundPaymentRequest());
 
-        $this->assertInstanceOf(RefundPaymentResult::class, $result);
         $this->assertSame('1234', $result->getRefundId());
     }
 

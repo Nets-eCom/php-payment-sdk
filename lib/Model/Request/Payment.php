@@ -7,6 +7,8 @@ namespace NexiCheckout\Model\Request;
 use NexiCheckout\Model\Request\Payment\Checkout;
 use NexiCheckout\Model\Request\Payment\Notification;
 use NexiCheckout\Model\Request\Payment\Order;
+use NexiCheckout\Model\Request\Payment\Subscription;
+use NexiCheckout\Model\Request\Payment\UnscheduledSubscription;
 
 class Payment implements \JsonSerializable
 {
@@ -14,6 +16,8 @@ class Payment implements \JsonSerializable
         private readonly Order $order,
         private readonly Checkout $checkout,
         private readonly ?Notification $notification = null,
+        private readonly ?Subscription $subscription = null,
+        private readonly ?UnscheduledSubscription $unscheduledSubscription = null,
         private readonly ?string $merchantNumber = null,
         private readonly ?string $myReference = null
     ) {
@@ -59,6 +63,8 @@ class Payment implements \JsonSerializable
             'order' => $this->order,
             'checkout' => $this->checkout,
             'notifications' => $this->notification,
+            'subscription' => $this->subscription,
+            'unscheduledSubscription' => $this->unscheduledSubscription,
             'merchantNumber' => $this->merchantNumber,
             'myReference' => $this->myReference,
         ];

@@ -18,6 +18,7 @@ use NexiCheckout\Model\Request\RefundCharge;
 use NexiCheckout\Model\Request\RefundPayment;
 use NexiCheckout\Model\Request\UpdateOrder;
 use NexiCheckout\Model\Result\ChargeResult;
+use NexiCheckout\Model\Result\Payment\PaymentWithEmbeddedCheckoutResult;
 use NexiCheckout\Model\Result\Payment\PaymentWithHostedCheckoutResult;
 use NexiCheckout\Model\Result\RefundChargeResult;
 use NexiCheckout\Model\Result\RefundPaymentResult;
@@ -54,27 +55,20 @@ class PaymentApi
 
     /**
      * @throws PaymentApiException
+     * @throws \JsonException
      */
-    public function createPayment(Payment $payment): PaymentWithHostedCheckoutResult
+    public function createHostedPayment(Payment $payment): PaymentWithHostedCheckoutResult
     {
-        try {
-            $response = $this->client->post(self::PAYMENTS_ENDPOINT, json_encode($payment));
-        } catch (HttpClientException $httpClientException) {
-            throw new PaymentApiException(
-                'Couldn\'t create payment',
-                $httpClientException->getCode(),
-                $httpClientException
-            );
-        }
+        return PaymentWithHostedCheckoutResult::fromJson($this->createPaymentContent($payment));
+    }
 
-        $code = $response->getStatusCode();
-        $contents = $response->getBody()->getContents();
-
-        if (!$this->isSuccessCode($code)) {
-            throw $this->createPaymentApiException($code, $contents);
-        }
-
-        return PaymentWithHostedCheckoutResult::fromJson($contents);
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function createEmbeddedPayment(Payment $payment): PaymentWithEmbeddedCheckoutResult
+    {
+        return PaymentWithEmbeddedCheckoutResult::fromJson($this->createPaymentContent($payment));
     }
 
     /**
@@ -361,5 +355,31 @@ class PaymentApi
             $code >= 500 && $code < 600 => new PaymentApiException(\sprintf('Server error occurred: %s', $contents)),
             default => new PaymentApiException(\sprintf('Unexpected status code: %d', $code)),
         };
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    private function createPaymentContent(Payment $payment): string
+    {
+        try {
+            $response = $this->client->post(self::PAYMENTS_ENDPOINT, json_encode($payment));
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                'Couldn\'t create payment',
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return $contents;
     }
 }

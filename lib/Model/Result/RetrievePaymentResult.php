@@ -20,7 +20,9 @@ use NexiCheckout\Model\Result\RetrievePayment\PaymentDetails\InvoiceDetails;
 use NexiCheckout\Model\Result\RetrievePayment\PaymentDetails\PaymentTypeEnum;
 use NexiCheckout\Model\Result\RetrievePayment\Refund;
 use NexiCheckout\Model\Result\RetrievePayment\RefundStateEnum;
+use NexiCheckout\Model\Result\RetrievePayment\Subscription;
 use NexiCheckout\Model\Result\RetrievePayment\Summary;
+use NexiCheckout\Model\Result\RetrievePayment\UnscheduledSubscription;
 use NexiCheckout\Model\Result\Shared\PhoneNumber;
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
 use NexiCheckout\Model\Shared\JsonDeserializeTrait;
@@ -68,6 +70,8 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             self::createPaymentDetails($data['paymentDetails']),
             isset($data['refunds']) ? self::createRefunds($data['refunds']) : null,
             isset($data['charges']) ? self::createCharges($data['charges']) : null,
+            isset($data['subscription']) ? self::createSubscription($data['subscription']) : null,
+            isset($data['unscheduledSubscription']) ? self::createUnscheduledSubscription($data['unscheduledSubscription']) : null,
             $data['myReference'] ?? null
         );
     }
@@ -305,5 +309,21 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             $data['prefix'],
             $data['number']
         );
+    }
+
+    /**
+     * @param array<string, string> $data
+     */
+    private static function createSubscription(array $data): Subscription
+    {
+        return new Subscription($data['id']);
+    }
+
+    /**
+     * @param array<string, string> $data
+     */
+    private static function createUnscheduledSubscription(array $data): UnscheduledSubscription
+    {
+        return new UnscheduledSubscription($data['unscheduledSubscriptionId']);
     }
 }

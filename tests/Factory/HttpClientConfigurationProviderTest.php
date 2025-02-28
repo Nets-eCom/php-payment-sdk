@@ -88,7 +88,6 @@ final class HttpClientConfigurationProviderTest extends TestCase
         string $baseUrl,
         ?string $commercePlatformTag = null
     ): void {
-        $this->assertInstanceOf(Configuration::class, $result);
         $this->assertSame($secretKey, $result->getSecretKey());
         $this->assertSame($baseUrl, $result->getBaseUrl());
         $this->assertSame($commercePlatformTag, $result->getCommercePlatformTag());

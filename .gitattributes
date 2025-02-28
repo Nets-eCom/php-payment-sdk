@@ -1,4 +1,6 @@
 /tests export-ignore
-/phpunit.xml.dist export-ignore
-/azure-pipelines.yaml export-ignore
+/*.dist export-ignore
+/*.php
+/*.yaml export-ignore
+/Makefile export-ignore
 /.git* export-ignore

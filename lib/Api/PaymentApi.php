@@ -23,10 +23,13 @@ use NexiCheckout\Model\Result\Payment\PaymentWithHostedCheckoutResult;
 use NexiCheckout\Model\Result\RefundChargeResult;
 use NexiCheckout\Model\Result\RefundPaymentResult;
 use NexiCheckout\Model\Result\RetrievePaymentResult;
+use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
 
 class PaymentApi
 {
     private const PAYMENTS_ENDPOINT = '/v1/payments';
+
+    private const SUBSCRIPTIONS_ENDPOINT = '/v1/subscriptions';
 
     private const PAYMENT_CHARGES = '/charges';
 
@@ -94,6 +97,32 @@ class PaymentApi
         }
 
         return RetrievePaymentResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveSubscription(string $subscriptionId): RetrieveSubscriptionResult
+    {
+        try {
+            $response = $this->client->get(\sprintf('%s/%s', self::SUBSCRIPTIONS_ENDPOINT, $subscriptionId));
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf('Couldn\'t retrieve subscription for a given id: %s', $subscriptionId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveSubscriptionResult::fromJson($contents);
     }
 
     /**

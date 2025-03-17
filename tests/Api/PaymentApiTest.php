@@ -184,6 +184,40 @@ final class PaymentApiTest extends TestCase
         $this->assertFalse($payment->isSubscriptionPayment());
     }
 
+    public function testItRetrievesSubscription(): void
+    {
+        $subscriptionId = 'foo';
+
+        $stream = $this->createStub(StreamInterface::class);
+        $stream
+            ->method('getContents')
+            ->willReturn(
+                json_encode([
+                    'subscriptionId' => $subscriptionId,
+                    'interval' => 0,
+                    'endDate' => '2019-08-24T14:15:22Z',
+                    'paymentDetails' => [
+                        'paymentType' => 'CARD',
+                        'paymentMethod' => 'Visa',
+                        'cardDetails' => [
+                            'expiryDate' => 'foo',
+                            'maskedPan' => 'bar',
+                        ],
+                    ],
+                ])
+            );
+
+        $response = $this->createStub(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn(200);
+        $response->method('getBody')->willReturn($stream);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+
+        $result = $sut->retrieveSubscription($subscriptionId);
+
+        $this->assertSame($subscriptionId, $result->getSubscriptionId());
+    }
+
     public function testItThrowsExceptionOnUnknownPaymentRetrieve(): void
     {
         $this->expectException(PaymentApiException::class);

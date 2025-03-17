@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace NexiCheckout\Model\Result\RetrievePayment;
 
-use NexiCheckout\Model\Result\RetrievePayment\PaymentDetails\CardDetails;
 use NexiCheckout\Model\Result\RetrievePayment\PaymentDetails\InvoiceDetails;
-use NexiCheckout\Model\Result\RetrievePayment\PaymentDetails\PaymentTypeEnum;
+use NexiCheckout\Model\Result\Shared\CardDetails;
+use NexiCheckout\Model\Result\Shared\PaymentTypeEnum;
 
 class PaymentDetails
 {

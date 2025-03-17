@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Model\Result\RetrievePayment\PaymentDetails;
+namespace NexiCheckout\Model\Result\Shared;
 
 class CardDetails
 {

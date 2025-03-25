@@ -38,23 +38,12 @@ final class PaymentApiTest extends TestCase
 {
     public function testItCreatesHostedPayment(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'paymentId' => '1234',
-                    'hostedPaymentPageUrl' => 'https://api.example.com/hostedUrl',
-                ])
-            );
+        $response = $this->createResponse([
+            'paymentId' => '1234',
+            'hostedPaymentPageUrl' => 'https://api.example.com/hostedUrl',
+        ], 200);
 
-        $streamFactory = $this->createStreamFactory($stream);
-
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $streamFactory);
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->createHostedPayment($this->createPaymentRequest());
 
@@ -64,22 +53,11 @@ final class PaymentApiTest extends TestCase
 
     public function testItCreatesEmbeddedPayment(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'paymentId' => '1234',
-                ])
-            );
+        $response = $this->createResponse([
+            'paymentId' => '1234',
+        ], 200);
 
-        $streamFactory = $this->createStreamFactory($stream);
-
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $streamFactory);
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->createEmbeddedPayment($this->createPaymentRequest());
 
@@ -106,24 +84,14 @@ final class PaymentApiTest extends TestCase
     {
         $this->expectException(ClientErrorPaymentApiException::class);
 
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn('{
-                "errors": {
-                    "property1": [
-                        "string"
-                    ],
-                    "property2": [
-                        "string"
-                    ]
-                }
-            }');
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(400);
-        $response->method('getBody')->willReturn($stream);
+        $response = $this->createResponse([
+            'errors' => [
+                'property1' => ['string'],
+                'property2' => ['string'],
+            ],
+        ], 400);
 
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
         $sut->createHostedPayment($this->createPaymentRequest());
     }
 
@@ -131,8 +99,7 @@ final class PaymentApiTest extends TestCase
     {
         $this->expectException(PaymentApiException::class);
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(500);
+        $response = $this->createResponse([], 500);
 
         $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
         $sut->createHostedPayment($this->createPaymentRequest());
@@ -140,41 +107,32 @@ final class PaymentApiTest extends TestCase
 
     public function testItRetrievesPayment(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'payment' => [
-                        'paymentId' => '1234',
-                        'orderDetails' => [
-                            'amount' => 1000,
-                            'currency' => 'PLN',
-                        ],
-                        'created' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
-                        'consumer' => [
-                            'shippingAddress' => [],
-                            'billingAddress' => [],
-                            'privatePerson' => [],
-                            'company' => [],
-                        ],
-                        'summary' => [],
-                        'paymentDetails' => [
-                            'invoiceDetails' => [],
-                        ],
-                        'checkout' => [
-                            'url' => 'https://shop.example.com/checkout/1000',
-                            'cancelUrl' => 'https://shop.example.com/cancelUrl',
-                        ],
-                    ],
-                ])
-            );
+        $response = $this->createResponse([
+            'payment' => [
+                'paymentId' => '1234',
+                'orderDetails' => [
+                    'amount' => 1000,
+                    'currency' => 'PLN',
+                ],
+                'created' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+                'consumer' => [
+                    'shippingAddress' => [],
+                    'billingAddress' => [],
+                    'privatePerson' => [],
+                    'company' => [],
+                ],
+                'summary' => [],
+                'paymentDetails' => [
+                    'invoiceDetails' => [],
+                ],
+                'checkout' => [
+                    'url' => 'https://shop.example.com/checkout/1000',
+                    'cancelUrl' => 'https://shop.example.com/cancelUrl',
+                ],
+            ],
+        ], 200);
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->retrievePayment('1234');
 
@@ -187,33 +145,53 @@ final class PaymentApiTest extends TestCase
     public function testItRetrievesSubscription(): void
     {
         $subscriptionId = 'foo';
-
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'subscriptionId' => $subscriptionId,
-                    'interval' => 0,
-                    'endDate' => '2019-08-24T14:15:22Z',
-                    'paymentDetails' => [
-                        'paymentType' => 'CARD',
-                        'paymentMethod' => 'Visa',
-                        'cardDetails' => [
-                            'expiryDate' => 'foo',
-                            'maskedPan' => 'bar',
-                        ],
+        $response = $this->createResponse(
+            [
+                'subscriptionId' => $subscriptionId,
+                'interval' => 0,
+                'endDate' => '2019-08-24T14:15:22Z',
+                'paymentDetails' => [
+                    'paymentType' => 'CARD',
+                    'paymentMethod' => 'Visa',
+                    'cardDetails' => [
+                        'expiryDate' => 'foo',
+                        'maskedPan' => 'bar',
                     ],
-                ])
-            );
+                ],
+            ],
+            200
+        );
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->retrieveSubscription($subscriptionId);
+
+        $this->assertSame($subscriptionId, $result->getSubscriptionId());
+    }
+
+    public function testItRetrievesSubscriptionByExternalReference(): void
+    {
+        $subscriptionId = 'foo';
+        $response = $this->createResponse(
+            [
+                'subscriptionId' => $subscriptionId,
+                'interval' => 0,
+                'endDate' => '2019-08-24T14:15:22Z',
+                'paymentDetails' => [
+                    'paymentType' => 'CARD',
+                    'paymentMethod' => 'Visa',
+                    'cardDetails' => [
+                        'expiryDate' => 'foo',
+                        'maskedPan' => 'bar',
+                    ],
+                ],
+            ],
+            200
+        );
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveSubscriptionByExternalReference($subscriptionId, 'ref');
 
         $this->assertSame($subscriptionId, $result->getSubscriptionId());
     }
@@ -222,8 +200,7 @@ final class PaymentApiTest extends TestCase
     {
         $this->expectException(PaymentApiException::class);
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(404);
+        $response = $this->createResponse([], 404);
 
         $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
 
@@ -232,20 +209,11 @@ final class PaymentApiTest extends TestCase
 
     public function testItCreatesCharge(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'chargeId' => '1234',
-                ])
-            );
+        $response = $this->createResponse([
+            'chargeId' => '1234',
+        ], 200);
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->charge('1234', $this->createChargeRequest());
 
@@ -254,80 +222,46 @@ final class PaymentApiTest extends TestCase
 
     public function testItUpdatesReferenceInformation(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn('');
+        $response = $this->createResponse([], 200);
 
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('getStatusCode')->willReturn(200);
-        $response->expects($this->once())->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $sut->updateReferenceInformation('1234', $this->createReferenceInformationRequest());
     }
 
     public function testItUpdatesMyReferenceInformation(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn('');
+        $response = $this->createResponse([], 204);
 
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('getStatusCode')->willReturn(204);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $sut->updateMyReference('1234', $this->createMyReferenceRequest());
     }
 
     public function testItUpdatesOrder(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn('');
+        $response = $this->createResponse([], 204);
 
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('getStatusCode')->willReturn(204);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
         $sut->updatePaymentOrder('1234', $this->createUpdateOrderRequest());
     }
 
     public function testItTerminatesPayment(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn('');
+        $response = $this->createResponse([], 200);
 
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('getStatusCode')->willReturn(204);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $sut->terminate('1234');
     }
 
     public function testItRefundsCharge(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'refundId' => '1234',
-                ])
-            );
+        $response = $this->createResponse([
+            'refundId' => '1234',
+        ], 200);
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->refundCharge('1234', $this->createRefundChargeRequest());
 
@@ -336,20 +270,11 @@ final class PaymentApiTest extends TestCase
 
     public function testItRefundsPayment(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn(
-                json_encode([
-                    'refundId' => '1234',
-                ])
-            );
+        $response = $this->createResponse([
+            'refundId' => '1234',
+        ], 200);
 
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn(200);
-        $response->method('getBody')->willReturn($stream);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $result = $sut->refundPayment('1234', $this->createRefundPaymentRequest());
 
@@ -358,17 +283,28 @@ final class PaymentApiTest extends TestCase
 
     public function testItCancelsPendingRefund(): void
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getContents')
-            ->willReturn('');
+        $response = $this->createResponse([], 204);
 
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('getStatusCode')->willReturn(204);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($stream));
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
 
         $sut->cancelPendingRefund('1234');
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function createResponse(array $data, int $code): ResponseInterface
+    {
+        $contents = $data !== [] ? json_encode($data) : '';
+
+        $stream = $this->createStub(StreamInterface::class);
+        $stream->method('getContents')->willReturn($contents);
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response->expects($this->once())->method('getStatusCode')->willReturn($code);
+        $response->method('getBody')->willReturn($stream);
+
+        return $response;
     }
 
     private function createPsrClient(ResponseInterface $response): ClientInterface

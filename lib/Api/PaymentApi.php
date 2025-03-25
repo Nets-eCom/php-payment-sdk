@@ -105,24 +105,24 @@ class PaymentApi
      */
     public function retrieveSubscription(string $subscriptionId): RetrieveSubscriptionResult
     {
-        try {
-            $response = $this->client->get(\sprintf('%s/%s', self::SUBSCRIPTIONS_ENDPOINT, $subscriptionId));
-        } catch (HttpClientException $httpClientException) {
-            throw new PaymentApiException(
-                \sprintf('Couldn\'t retrieve subscription for a given id: %s', $subscriptionId),
-                $httpClientException->getCode(),
-                $httpClientException
-            );
-        }
+        return $this->fetchSubscription(
+            \sprintf('%s/%s', self::SUBSCRIPTIONS_ENDPOINT, $subscriptionId),
+            $subscriptionId
+        );
+    }
 
-        $code = $response->getStatusCode();
-        $contents = $response->getBody()->getContents();
-
-        if (!$this->isSuccessCode($code)) {
-            throw $this->createPaymentApiException($code, $contents);
-        }
-
-        return RetrieveSubscriptionResult::fromJson($contents);
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveSubscriptionByExternalReference(
+        string $subscriptionId,
+        string $externalReference
+    ): RetrieveSubscriptionResult {
+        return $this->fetchSubscription(
+            \sprintf('%s/%s?externalReference=%s', self::SUBSCRIPTIONS_ENDPOINT, $subscriptionId, $externalReference),
+            $subscriptionId
+        );
     }
 
     /**
@@ -358,6 +358,32 @@ class PaymentApi
         if (!$this->isSuccessCode($code)) {
             throw $this->createPaymentApiException($code, $response->getBody()->getContents());
         }
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    private function fetchSubscription(string $url, string $subscriptionId): RetrieveSubscriptionResult
+    {
+        try {
+            $response = $this->client->get($url);
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf('Couldn\'t retrieve subscription for a given id: %s', $subscriptionId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveSubscriptionResult::fromJson($contents);
     }
 
     private function getPaymentOperationPath(string $paymentId, string $operation): string

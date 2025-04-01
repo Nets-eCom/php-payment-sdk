@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace NexiCheckout\Model\Request;
 
 use NexiCheckout\Model\Request\Payment\Checkout;
-use NexiCheckout\Model\Request\Payment\Notification;
-use NexiCheckout\Model\Request\Payment\Order;
 use NexiCheckout\Model\Request\Payment\Subscription;
 use NexiCheckout\Model\Request\Payment\UnscheduledSubscription;
+use NexiCheckout\Model\Request\Shared\Notification;
+use NexiCheckout\Model\Request\Shared\Order;
 
 class Payment implements \JsonSerializable
 {

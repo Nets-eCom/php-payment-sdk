@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Model\Request\Payment;
+namespace NexiCheckout\Model\Request\Shared;
+
+use NexiCheckout\Model\Request\Shared\Notification\Webhook;
 
 final class Notification implements \JsonSerializable
 {

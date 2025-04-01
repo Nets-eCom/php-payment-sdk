@@ -20,4 +20,9 @@ $hostedPayment = $api->createHostedPayment(new Payment(...));
 
 // Embedded checkout  
 $embeddedPayment = $api->createEmbeddedPayment(new Payment(...));
+
+// Subscription related calls
+$subscriptionApi = (new PaymentApiFactory($factory, $provider))->createSubscriptionApi($secretKey, $isLiveMode);
+
+$subscriptionApi->retrieveSubscription('d079718b-ff63-45dd-947b-4950c023750f');
 ```

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Model\Request\Payment;
+namespace NexiCheckout\Model\Request\Shared;
 
 use NexiCheckout\Model\Request\Item;
 

@@ -9,6 +9,7 @@ use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Api\PaymentApi;
 use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
+use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\Charge;
 use NexiCheckout\Model\Request\FullCharge;
 use NexiCheckout\Model\Request\FullRefundCharge;
@@ -16,12 +17,12 @@ use NexiCheckout\Model\Request\Item;
 use NexiCheckout\Model\Request\MyReference;
 use NexiCheckout\Model\Request\Payment;
 use NexiCheckout\Model\Request\Payment\HostedCheckout;
-use NexiCheckout\Model\Request\Payment\Notification;
-use NexiCheckout\Model\Request\Payment\Order;
-use NexiCheckout\Model\Request\Payment\Webhook;
 use NexiCheckout\Model\Request\ReferenceInformation;
 use NexiCheckout\Model\Request\RefundCharge;
 use NexiCheckout\Model\Request\RefundPayment;
+use NexiCheckout\Model\Request\Shared\Notification;
+use NexiCheckout\Model\Request\Shared\Notification\Webhook;
+use NexiCheckout\Model\Request\Shared\Order;
 use NexiCheckout\Model\Request\UpdateOrder;
 use NexiCheckout\Model\Request\UpdateOrder\PaymentMethod;
 use NexiCheckout\Model\Request\UpdateOrder\Shipping;
@@ -194,6 +195,21 @@ final class PaymentApiTest extends TestCase
         $result = $sut->retrieveSubscriptionByExternalReference($subscriptionId, 'ref');
 
         $this->assertSame($subscriptionId, $result->getSubscriptionId());
+    }
+
+    public function testItBulkChargesSubscription(): void
+    {
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'bulkId' => $bulkId,
+        ], 200);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->bulkChargeSubscription($this->createBulkChargeSubscriptionRequest());
+
+        $this->assertSame($result->getBulkId(), $bulkId);
     }
 
     public function testItThrowsExceptionOnUnknownPaymentRetrieve(): void
@@ -407,6 +423,15 @@ final class PaymentApiTest extends TestCase
     private function createRefundPaymentRequest(): RefundPayment
     {
         return new RefundPayment(1);
+    }
+
+    private function createBulkChargeSubscriptionRequest(): BulkChargeSubscription
+    {
+        return new BulkChargeSubscription(
+            'foo',
+            new Notification([new Webhook('foo', 'bar', 'baz')]),
+            []
+        );
     }
 
     private function createRequestFactoryStub(): RequestFactoryInterface

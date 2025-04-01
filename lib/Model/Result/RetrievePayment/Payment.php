@@ -143,6 +143,10 @@ class Payment
             return false;
         }
 
+        if ($summary->getReservedAmount() === 0 && $summary->getChargedAmount() > 0) {
+            return true;
+        }
+
         return $summary->getChargedAmount() === $summary->getReservedAmount();
     }
 
@@ -184,6 +188,12 @@ class Payment
 
     private function isCancelled(): bool
     {
-        return $this->getSummary()->getCancelledAmount() > 0;
+        $summary = $this->getSummary();
+
+        if ($summary->getCancelledAmount() === 0) {
+            return false;
+        }
+
+        return $summary->getCancelledAmount() === $summary->getReservedAmount();
     }
 }

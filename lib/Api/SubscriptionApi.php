@@ -9,6 +9,8 @@ use NexiCheckout\Api\Exception\InternalErrorPaymentApiException;
 use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
+use NexiCheckout\Model\Request\BulkChargeSubscription;
+use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
 
@@ -47,6 +49,31 @@ class SubscriptionApi
             \sprintf('%s/%s?externalReference=%s', self::SUBSCRIPTIONS_ENDPOINT, $subscriptionId, $externalReference),
             $subscriptionId
         );
+    }
+
+    public function bulkChargeSubscription(BulkChargeSubscription $bulkChargeSubscription): BulkChargeSubscriptionResult
+    {
+        try {
+            $response = $this->client->post(
+                self::SUBSCRIPTION_CHARGES_BULK,
+                json_encode($bulkChargeSubscription)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                'Couldn\'t bulk charge subscription',
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return BulkChargeSubscriptionResult::fromJson($contents);
     }
 
     /**

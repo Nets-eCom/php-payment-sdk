@@ -13,6 +13,9 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
 {
     use JsonDeserializeTrait;
 
+    /**
+     * @param list<SubscriptionCharge> $page
+     */
     public function __construct(
         private readonly array $page,
         private readonly bool $more,
@@ -53,7 +56,7 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
                 $charge['source'] ?? null,
                 $charge['externalReference'] ?? null
             ),
-            $payload['charges']
+            $payload['page']
         );
 
         return new self($charges, $payload['more'], $payload['status']);

@@ -9,7 +9,6 @@ use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Api\PaymentApi;
 use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
-use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\Charge;
 use NexiCheckout\Model\Request\FullCharge;
 use NexiCheckout\Model\Request\FullRefundCharge;
@@ -141,75 +140,6 @@ final class PaymentApiTest extends TestCase
 
         $this->assertSame($payment->getPaymentId(), '1234');
         $this->assertFalse($payment->isSubscriptionPayment());
-    }
-
-    public function testItRetrievesSubscription(): void
-    {
-        $subscriptionId = 'foo';
-        $response = $this->createResponse(
-            [
-                'subscriptionId' => $subscriptionId,
-                'interval' => 0,
-                'endDate' => '2019-08-24T14:15:22Z',
-                'paymentDetails' => [
-                    'paymentType' => 'CARD',
-                    'paymentMethod' => 'Visa',
-                    'cardDetails' => [
-                        'expiryDate' => 'foo',
-                        'maskedPan' => 'bar',
-                    ],
-                ],
-            ],
-            200
-        );
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
-
-        $result = $sut->retrieveSubscription($subscriptionId);
-
-        $this->assertSame($subscriptionId, $result->getSubscriptionId());
-    }
-
-    public function testItRetrievesSubscriptionByExternalReference(): void
-    {
-        $subscriptionId = 'foo';
-        $response = $this->createResponse(
-            [
-                'subscriptionId' => $subscriptionId,
-                'interval' => 0,
-                'endDate' => '2019-08-24T14:15:22Z',
-                'paymentDetails' => [
-                    'paymentType' => 'CARD',
-                    'paymentMethod' => 'Visa',
-                    'cardDetails' => [
-                        'expiryDate' => 'foo',
-                        'maskedPan' => 'bar',
-                    ],
-                ],
-            ],
-            200
-        );
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
-
-        $result = $sut->retrieveSubscriptionByExternalReference($subscriptionId, 'ref');
-
-        $this->assertSame($subscriptionId, $result->getSubscriptionId());
-    }
-
-    public function testItBulkChargesSubscription(): void
-    {
-        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
-
-        $response = $this->createResponse([
-            'bulkId' => $bulkId,
-        ], 200);
-
-        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
-
-        $result = $sut->bulkChargeSubscription($this->createBulkChargeSubscriptionRequest());
-
-        $this->assertSame($result->getBulkId(), $bulkId);
     }
 
     public function testItThrowsExceptionOnUnknownPaymentRetrieve(): void
@@ -423,15 +353,6 @@ final class PaymentApiTest extends TestCase
     private function createRefundPaymentRequest(): RefundPayment
     {
         return new RefundPayment(1);
-    }
-
-    private function createBulkChargeSubscriptionRequest(): BulkChargeSubscription
-    {
-        return new BulkChargeSubscription(
-            'foo',
-            new Notification([new Webhook('foo', 'bar', 'baz')]),
-            []
-        );
     }
 
     private function createRequestFactoryStub(): RequestFactoryInterface

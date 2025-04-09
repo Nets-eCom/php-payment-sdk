@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NexiCheckout\Model\Result;
 
+use NexiCheckout\Model\Result\Shared\BulkOperationStatusEnum;
 use NexiCheckout\Model\Result\SubscriptionCharges\ChargeStatusEnum;
 use NexiCheckout\Model\Result\SubscriptionCharges\SubscriptionCharge;
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
@@ -19,7 +20,7 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
     public function __construct(
         private readonly array $page,
         private readonly bool $more,
-        private readonly string $status,
+        private readonly BulkOperationStatusEnum $bulkOperationStatus,
     ) {
     }
 
@@ -36,14 +37,14 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
         return $this->more;
     }
 
-    public function getStatus(): string
+    public function getBulkOperationStatus(): BulkOperationStatusEnum
     {
-        return $this->status;
+        return $this->bulkOperationStatus;
     }
 
-    public static function fromJson(string $json): RetrieveSubscriptionBulkChargesResult
+    public static function fromJson(string $string): RetrieveSubscriptionBulkChargesResult
     {
-        $payload = self::jsonDeserialize($json);
+        $payload = self::jsonDeserialize($string);
 
         $charges = array_map(
             fn (array $charge) => new SubscriptionCharge(
@@ -59,6 +60,6 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
             $payload['page']
         );
 
-        return new self($charges, $payload['more'], $payload['status']);
+        return new self($charges, $payload['more'], BulkOperationStatusEnum::from($payload['status']));
     }
 }

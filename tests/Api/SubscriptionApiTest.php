@@ -10,6 +10,9 @@ use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\Shared\Notification;
 use NexiCheckout\Model\Request\Shared\Notification\Webhook;
+use NexiCheckout\Model\Result\RetrieveBulkVerifications\VerificationStatusEnum;
+use NexiCheckout\Model\Result\Shared\BulkOperationStatusEnum;
+use NexiCheckout\Model\Result\SubscriptionCharges\ChargeStatusEnum;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -112,8 +115,37 @@ final class SubscriptionApiTest extends TestCase
         $result = $sut->retrieveSubscriptionBulkCharges($bulkId);
 
         $this->assertSame($subscriptionId, $result->getPage()[0]->getSubscriptionId());
-        $this->assertSame('Succeeded', $result->getPage()[0]->getStatus()->value);
-        $this->assertSame('Done', $result->getStatus());
+        $this->assertSame(ChargeStatusEnum::SUCCEEDED, $result->getPage()[0]->getChargeStatus());
+        $this->assertFalse($result->isMore());
+        $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
+    }
+
+    public function testItRetrievesBulkVerifications(): void
+    {
+        $subscriptionId = 'foo';
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'page' => [
+                [
+                    'subscriptionId' => $subscriptionId,
+                    'paymentId' => '1234',
+                    'chargeId' => '123456789',
+                    'status' => 'Succeeded',
+                ],
+            ],
+            'more' => false,
+            'status' => 'Done',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveBulkVerifications($bulkId);
+
+        $this->assertSame($subscriptionId, $result->getPage()[0]->getSubscriptionId());
+        $this->assertSame(VerificationStatusEnum::SUCCEEDED, $result->getPage()[0]->getVerificationStatusEnum());
+        $this->assertFalse($result->isMore());
+        $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
     }
 
     /**

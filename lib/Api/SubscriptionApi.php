@@ -11,6 +11,7 @@ use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
+use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
 
@@ -19,6 +20,8 @@ class SubscriptionApi
     private const SUBSCRIPTIONS_ENDPOINT = '/v1/subscriptions';
 
     private const SUBSCRIPTION_CHARGES_BULK = self::SUBSCRIPTIONS_ENDPOINT . '/charges';
+
+    private const SUBSCRIPTION_VERIFICATIONS = self::SUBSCRIPTIONS_ENDPOINT . '/verifications';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -106,6 +109,38 @@ class SubscriptionApi
         }
 
         return RetrieveSubscriptionBulkChargesResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveBulkVerifications(string $bulkId): RetrieveBulkVerificationsResult
+    {
+        try {
+            $response = $this->client->get(
+                \sprintf(
+                    '%s/%s',
+                    self::SUBSCRIPTION_VERIFICATIONS,
+                    $bulkId
+                )
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf('Couldn\'t retrieve verifications for bulk ID: %s', $bulkId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveBulkVerificationsResult::fromJson($contents);
     }
 
     /**

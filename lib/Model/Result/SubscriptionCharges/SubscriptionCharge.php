@@ -23,7 +23,7 @@ class SubscriptionCharge
         return $this->subscriptionId;
     }
 
-    public function getStatus(): ChargeStatusEnum
+    public function getChargeStatus(): ChargeStatusEnum
     {
         return $this->status;
     }

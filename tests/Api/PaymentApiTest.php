@@ -142,6 +142,41 @@ final class PaymentApiTest extends TestCase
         $this->assertFalse($payment->isSubscriptionPayment());
     }
 
+    public function testItRetrievesEmbeddedPaymentResult(): void
+    {
+        $response = $this->createResponse([
+            'payment' => [
+                'paymentId' => '1234',
+                'orderDetails' => [
+                    'amount' => 1000,
+                    'currency' => 'PLN',
+                ],
+                'created' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+                'consumer' => [
+                    'shippingAddress' => [],
+                    'billingAddress' => [],
+                    'privatePerson' => [],
+                    'company' => [],
+                ],
+                'summary' => [],
+                'paymentDetails' => [
+                    'invoiceDetails' => [],
+                ],
+                'checkout' => [
+                    'url' => 'https://shop.example.com/checkout/1000',
+                ],
+            ],
+        ], 200);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrievePayment('1234');
+
+        $payment = $result->getPayment();
+
+        $this->assertSame($payment->getPaymentId(), '1234');
+    }
+
     public function testItThrowsExceptionOnUnknownPaymentRetrieve(): void
     {
         $this->expectException(PaymentApiException::class);

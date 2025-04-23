@@ -35,6 +35,20 @@ class RetrievePaymentResult implements JsonDeserializeInterface
     {
     }
 
+    /**
+     * @param array{
+     *     url: string,
+     *     cancelUrl: ?string
+     * } $data
+     */
+    public static function createCheckout(array $data): Checkout
+    {
+        return new Checkout(
+            $data['url'],
+            $data['cancelUrl'] ?? null
+        );
+    }
+
     public function getPayment(): Payment
     {
         return $this->payment;
@@ -62,7 +76,7 @@ class RetrievePaymentResult implements JsonDeserializeInterface
         return new Payment(
             $data['paymentId'],
             new OrderDetails(...$data['orderDetails']),
-            new Checkout(...$data['checkout']),
+            self::createCheckout($data['checkout']),
             new \DateTimeImmutable($data['created']),
             self::createConsumer($data['consumer']),
             isset($data['terminated']) ? new \DateTimeImmutable($data['terminated']) : null,

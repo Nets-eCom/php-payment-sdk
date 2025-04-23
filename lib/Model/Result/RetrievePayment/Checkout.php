@@ -6,7 +6,7 @@ namespace NexiCheckout\Model\Result\RetrievePayment;
 
 class Checkout
 {
-    public function __construct(private readonly string $url, private readonly ?string $cancelUrl)
+    public function __construct(private readonly string $url, private readonly ?string $cancelUrl = null)
     {
     }
 

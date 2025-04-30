@@ -10,10 +10,12 @@ use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
+use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
+use NexiCheckout\Model\Result\VerifySubscriptionsResult;
 
 class SubscriptionApi
 {
@@ -109,6 +111,32 @@ class SubscriptionApi
         }
 
         return RetrieveSubscriptionBulkChargesResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function verifySubscriptions(VerifySubscriptions $verifySubscriptions): VerifySubscriptionsResult
+    {
+        try {
+            $response = $this->client->post(self::SUBSCRIPTION_VERIFICATIONS, json_encode($verifySubscriptions));
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                'Couldn\'t verify subscriptions',
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return VerifySubscriptionsResult::fromJson($contents);
     }
 
     /**

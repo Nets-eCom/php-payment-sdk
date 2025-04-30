@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace NexiCheckout\Model\Request;
 
-use JsonSerializable;
 use NexiCheckout\Model\Request\BulkChargeSubscription\Subscription;
 use NexiCheckout\Model\Request\Shared\Notification;
 
-class BulkChargeSubscription implements JsonSerializable
+class BulkChargeSubscription implements \JsonSerializable
 {
     /**
      * @param list<Subscription> $subscriptions

@@ -10,6 +10,8 @@ use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\Shared\Notification;
 use NexiCheckout\Model\Request\Shared\Notification\Webhook;
+use NexiCheckout\Model\Request\VerifySubscriptions;
+use NexiCheckout\Model\Request\VerifySubscriptions\Subscription;
 use NexiCheckout\Model\Result\RetrieveBulkVerifications\VerificationStatusEnum;
 use NexiCheckout\Model\Result\Shared\BulkOperationStatusEnum;
 use NexiCheckout\Model\Result\SubscriptionCharges\ChargeStatusEnum;
@@ -146,6 +148,27 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame(VerificationStatusEnum::SUCCEEDED, $result->getPage()[0]->getVerificationStatusEnum());
         $this->assertFalse($result->isMore());
         $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
+    }
+
+    public function testItVerifySubscriptions(): void
+    {
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'bulkId' => $bulkId,
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->verifySubscriptions(new VerifySubscriptions(
+            [
+                new Subscription('foo'),
+                new Subscription(externalReference: 'bar'),
+            ],
+            $bulkId
+        ));
+
+        $this->assertSame($bulkId, $result->getBulkId());
     }
 
     /**

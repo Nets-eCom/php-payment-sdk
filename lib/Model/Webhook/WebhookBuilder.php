@@ -16,7 +16,7 @@ class WebhookBuilder
         return match ($eventName) {
             EventNameEnum::PAYMENT_CREATED => null /* @todo */,
             EventNameEnum::PAYMENT_RESERVATION_CREATED => null /* @todo */,
-            EventNameEnum::PAYMENT_RESERVATION_CREATED_V2 => null /* @todo */,
+            EventNameEnum::PAYMENT_RESERVATION_CREATED_V2 => ReservationCreated::fromJson($string),
             EventNameEnum::PAYMENT_RESERVATION_FAILED => null /* @todo */,
             EventNameEnum::PAYMENT_CHECKOUT_COMPLETED => CheckoutCompleted::fromJson($string),
             EventNameEnum::PAYMENT_CHARGE_CREATED => ChargeCreated::fromJson($string),

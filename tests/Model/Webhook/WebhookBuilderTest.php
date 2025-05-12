@@ -6,6 +6,7 @@ use NexiCheckout\Model\Webhook\CancelCreated;
 use NexiCheckout\Model\Webhook\ChargeCreated;
 use NexiCheckout\Model\Webhook\CheckoutCompleted;
 use NexiCheckout\Model\Webhook\RefundCompleted;
+use NexiCheckout\Model\Webhook\ReservationCreated;
 use NexiCheckout\Model\Webhook\WebhookBuilder;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -53,6 +54,20 @@ final class WebhookBuilderTest extends TestCase
             'payment.checkout.completed',
             CheckoutCompleted::class,
             '025400006091b1ef6937598058c4e487',
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.checkout.completed.missingData.json'),
+            'payment.checkout.completed',
+            CheckoutCompleted::class,
+            '025400006091b1ef6937598058c4e487',
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.reservation.created.v2.json'),
+            'payment.reservation.created.v2',
+            ReservationCreated::class,
+            'b015690c89d141f7b98b99dee769be62',
         ];
     }
 }

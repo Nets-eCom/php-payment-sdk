@@ -12,12 +12,12 @@ class Consumer
     public function __construct(
         private readonly string $firstName,
         private readonly string $lastName,
-        private readonly Address $billingAddress,
         private readonly string $country,
         private readonly string $email,
         private readonly string $ip,
-        private readonly PhoneNumber $phoneNumber,
-        private readonly Address $shippingAddress
+        private readonly Address $billingAddress,
+        private readonly Address $shippingAddress,
+        private readonly ?PhoneNumber $phoneNumber = null,
     ) {
     }
 
@@ -51,7 +51,7 @@ class Consumer
         return $this->ip;
     }
 
-    public function getPhoneNumber(): PhoneNumber
+    public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->phoneNumber;
     }

@@ -73,7 +73,7 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
     {
         $order = $data['order'];
         $consumer = $data['consumer'];
-        $phoneNumber = $consumer['phoneNumber'];
+        $phoneNumber = $consumer['phoneNumber'] ?? null;
 
         return new CheckoutCompletedData(
             $data['paymentId'],
@@ -85,12 +85,12 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
             new Consumer(
                 $consumer['firstName'],
                 $consumer['lastName'],
-                self::createAddress($consumer['billingAddress']),
                 $consumer['country'],
                 $consumer['email'],
                 $consumer['ip'],
-                new PhoneNumber($phoneNumber['prefix'], $phoneNumber['number']),
+                self::createAddress($consumer['billingAddress']),
                 self::createAddress($consumer['shippingAddress']),
+                $phoneNumber ? new PhoneNumber($phoneNumber['prefix'], $phoneNumber['number']) : null,
             )
         );
     }

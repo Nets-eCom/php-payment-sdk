@@ -26,3 +26,14 @@ $subscriptionApi = (new PaymentApiFactory($factory, $provider))->createSubscript
 
 $subscriptionApi->retrieveSubscription('d079718b-ff63-45dd-947b-4950c023750f');
 ```
+
+- Webhook models
+
+```php
+use NexiCheckout\Model\Webhook\WebhookBuilder;
+use Psr\Http\Message\StreamInterface;
+
+/** @var StreamInterface $request */
+$payload = $request->getContents();
+$result = WebhookBuilder::fromJson($payload);
+```

@@ -11,8 +11,8 @@ class Order
      */
     public function __construct(
         private readonly Amount $amount,
-        private readonly string $reference,
         private readonly array $orderItems,
+        private readonly ?string $reference = null,
     ) {
     }
 
@@ -21,16 +21,16 @@ class Order
         return $this->amount;
     }
 
-    public function getReference(): string
-    {
-        return $this->reference;
-    }
-
     /**
      * @return array<OrderItem>
      */
     public function getOrderItems(): array
     {
         return $this->orderItems;
+    }
+
+    public function getReference(): ?string
+    {
+        return $this->reference;
     }
 }

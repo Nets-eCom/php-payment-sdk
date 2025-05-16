@@ -36,7 +36,7 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
             $payload['id'],
             $payload['merchantId'],
             new \DateTimeImmutable($payload['timestamp']),
-            EventNameEnum::PAYMENT_CHECKOUT_COMPLETED,
+            EventNameEnum::from($payload['event']),
             self::createCheckoutCompleteData($payload['data'])
         );
     }
@@ -79,17 +79,17 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
             $data['paymentId'],
             new Order(
                 new Amount(...$order['amount']),
-                $order['reference'],
-                array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $order['orderItems'])
+                array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $order['orderItems']),
+                $order['reference'] ?? null,
             ),
             new Consumer(
-                $consumer['firstName'],
-                $consumer['lastName'],
-                $consumer['country'],
                 $consumer['email'],
                 $consumer['ip'],
-                self::createAddress($consumer['billingAddress']),
-                self::createAddress($consumer['shippingAddress']),
+                $consumer['country'],
+                self::createAddress($consumer['billingAddress'] ?? []),
+                self::createAddress($consumer['shippingAddress'] ?? []),
+                $consumer['firstName'] ?? null,
+                $consumer['lastName'] ?? null,
                 $phoneNumber ? new PhoneNumber($phoneNumber['prefix'], $phoneNumber['number']) : null,
             )
         );
@@ -101,12 +101,12 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
     private static function createAddress(array $address): Address
     {
         return new Address(
-            $address['addressLine1'],
-            $address['addressLine2'],
-            $address['city'],
-            $address['country'],
-            $address['postcode'],
-            $address['receiverLine'],
+            $address['addressLine1'] ?? null,
+            $address['addressLine2'] ?? null,
+            $address['city'] ?? null,
+            $address['country'] ?? null,
+            $address['postcode'] ?? null,
+            $address['receiverLine'] ?? null,
         );
     }
 }

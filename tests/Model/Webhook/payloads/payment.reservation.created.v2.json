@@ -2,7 +2,6 @@
     "id": "c9615ceacd174d46aab3dd7dea5333c3",
     "event": "payment.reservation.created.v2",
     "timestamp": "2025-05-03T05:06:11.3254+00:00",
-    "merchantId": 0,
     "merchantNumber": 100242833,
     "data": {
         "paymentMethod": "Visa",

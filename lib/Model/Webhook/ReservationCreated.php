@@ -14,7 +14,6 @@ class ReservationCreated implements WebhookInterface, JsonDeserializeInterface
     public function __construct(
         private readonly string $id,
         private readonly \DateTimeInterface $timestamp,
-        private readonly int $merchantId,
         private readonly int $merchantNumber,
         private readonly EventNameEnum $event,
         private readonly ReservationCreatedData $data,
@@ -29,11 +28,6 @@ class ReservationCreated implements WebhookInterface, JsonDeserializeInterface
     public function getTimestamp(): \DateTimeInterface
     {
         return $this->timestamp;
-    }
-
-    public function getMerchantId(): int
-    {
-        return $this->merchantId;
     }
 
     public function getMerchantNumber(): int
@@ -58,7 +52,6 @@ class ReservationCreated implements WebhookInterface, JsonDeserializeInterface
         return new self(
             id: $payload['id'],
             timestamp: new \DateTimeImmutable($payload['timestamp']),
-            merchantId: $payload['merchantId'],
             merchantNumber: $payload['merchantNumber'],
             event: EventNameEnum::from($payload['event']),
             data: self::createReservationCreated($payload['data'])

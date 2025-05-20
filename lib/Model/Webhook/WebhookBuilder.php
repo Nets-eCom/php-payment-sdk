@@ -14,7 +14,7 @@ class WebhookBuilder
         $eventName = EventNameEnum::from($payload['event']);
 
         return match ($eventName) {
-            EventNameEnum::PAYMENT_CREATED => null /* @todo */,
+            EventNameEnum::PAYMENT_CREATED => PaymentCreated::fromJson($string),
             EventNameEnum::PAYMENT_RESERVATION_CREATED => null /* @todo */,
             EventNameEnum::PAYMENT_RESERVATION_CREATED_V2 => ReservationCreated::fromJson($string),
             EventNameEnum::PAYMENT_RESERVATION_FAILED => null /* @todo */,

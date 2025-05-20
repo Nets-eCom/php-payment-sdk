@@ -1,10 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace NexiCheckout\Tests\CheckoutApi\Model\Webhook;
+declare(strict_types=1);
+
+namespace NexiCheckout\Tests\Model\Webhook;
 
 use NexiCheckout\Model\Webhook\CancelCreated;
 use NexiCheckout\Model\Webhook\ChargeCreated;
 use NexiCheckout\Model\Webhook\CheckoutCompleted;
+use NexiCheckout\Model\Webhook\PaymentCreated;
 use NexiCheckout\Model\Webhook\RefundCompleted;
 use NexiCheckout\Model\Webhook\ReservationCreated;
 use NexiCheckout\Model\Webhook\WebhookBuilder;
@@ -67,6 +70,13 @@ final class WebhookBuilderTest extends TestCase
             file_get_contents(__DIR__ . '/payloads/payment.reservation.created.v2.json'),
             'payment.reservation.created.v2',
             ReservationCreated::class,
+            'b015690c89d141f7b98b99dee769be62',
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.created.json'),
+            'payment.created',
+            PaymentCreated::class,
             'b015690c89d141f7b98b99dee769be62',
         ];
     }

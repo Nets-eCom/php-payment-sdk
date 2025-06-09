@@ -16,6 +16,7 @@ use NexiCheckout\Model\Request\Item;
 use NexiCheckout\Model\Request\MyReference;
 use NexiCheckout\Model\Request\Payment;
 use NexiCheckout\Model\Request\Payment\HostedCheckout;
+use NexiCheckout\Model\Request\Payment\MethodConfiguration;
 use NexiCheckout\Model\Request\ReferenceInformation;
 use NexiCheckout\Model\Request\RefundCharge;
 use NexiCheckout\Model\Request\RefundPayment;
@@ -344,7 +345,14 @@ final class PaymentApiTest extends TestCase
                 [
                     new Webhook('event', 'https://shop.example.com', '1234'),
                 ]
-            )
+            ),
+            null,
+            null,
+            null,
+            null,
+            [
+                new MethodConfiguration('foo', true),
+            ]
         );
     }
 

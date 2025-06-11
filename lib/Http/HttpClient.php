@@ -35,13 +35,19 @@ class HttpClient
     }
 
     /**
+     * @param array<string, string> $additionalHeaders
      * @throws HttpClientException
      */
-    public function post(string $path, string $body): ResponseInterface
+    public function post(string $path, string $body, array $additionalHeaders = []): ResponseInterface
     {
-        return $this->send(
-            $this->createRequest($this->createUrl($path), 'POST')->withBody($this->streamFactory->createStream($body))
-        );
+        $request = $this->createRequest($this->createUrl($path), 'POST')
+            ->withBody($this->streamFactory->createStream($body));
+
+        foreach ($additionalHeaders as $key => $value) {
+            $request = $request->withHeader($key, $value);
+        }
+
+        return $this->send($request);
     }
 
     /**

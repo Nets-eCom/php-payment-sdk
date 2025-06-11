@@ -221,10 +221,15 @@ class PaymentApi
         }
     }
 
-    public function charge(string $paymentId, Charge $charge): ChargeResult
+    public function charge(string $paymentId, Charge $charge, ?string $idempotencyKey = null): ChargeResult
     {
         try {
-            $response = $this->client->post($this->getPaymentOperationPath($paymentId, self::PAYMENT_CHARGES), json_encode($charge));
+            $headers = [];
+            if ($idempotencyKey !== null) {
+                $headers['Idempotency-Key'] = $idempotencyKey;
+            }
+
+            $response = $this->client->post($this->getPaymentOperationPath($paymentId, self::PAYMENT_CHARGES), json_encode($charge), $headers);
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 \sprintf('Couldn\'t create charge for a given payment id: %s', $paymentId),
@@ -246,12 +251,18 @@ class PaymentApi
     /**
      * @throws PaymentApiException
      */
-    public function refundCharge(string $chargeId, RefundCharge $refund): RefundChargeResult
+    public function refundCharge(string $chargeId, RefundCharge $refund, ?string $idempotencyKey = null): RefundChargeResult
     {
         try {
+            $headers = [];
+            if ($idempotencyKey !== null) {
+                $headers['Idempotency-Key'] = $idempotencyKey;
+            }
+
             $response = $this->client->post(
                 \sprintf('%s/%s%s', self::CHARGES_ENDPOINT, $chargeId, self::REFUNDS),
-                json_encode($refund)
+                json_encode($refund),
+                $headers
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
@@ -275,12 +286,18 @@ class PaymentApi
      * @throws PaymentApiException
      * @throws \JsonException
      */
-    public function refundPayment(string $paymentId, RefundPayment $refundPayment): RefundPaymentResult
+    public function refundPayment(string $paymentId, RefundPayment $refundPayment, ?string $idempotencyKey = null): RefundPaymentResult
     {
         try {
+            $headers = [];
+            if ($idempotencyKey !== null) {
+                $headers['Idempotency-Key'] = $idempotencyKey;
+            }
+
             $response = $this->client->post(
                 $this->getPaymentOperationPath($paymentId, self::REFUNDS),
-                json_encode($refundPayment)
+                json_encode($refundPayment),
+                $headers
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(

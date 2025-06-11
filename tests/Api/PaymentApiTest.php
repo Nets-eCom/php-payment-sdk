@@ -74,7 +74,7 @@ final class PaymentApiTest extends TestCase
                 $this->createPsrClientThrowingException(),
                 $this->createRequestFactoryStub(),
                 $this->createStub(StreamFactoryInterface::class),
-                new Configuration('1234', 'https://api.example.com')
+                new Configuration('secret-key-123', 'https://api.example.com')
             ),
         );
 
@@ -202,6 +202,54 @@ final class PaymentApiTest extends TestCase
         $this->assertSame('1234', $result->getChargeId());
     }
 
+    public function testItCreatesChargeWithIdempotencyKey(): void
+    {
+        $response = $this->createResponse([
+            'chargeId' => '1234',
+        ], 200);
+
+        $request = $this->createMock(RequestInterface::class);
+        $request->method('withBody')->willReturnSelf();
+
+        // Track which headers were set
+        $actualHeaders = [];
+        $request->expects($this->exactly(4))
+            ->method('withHeader')
+            ->willReturnCallback(function ($header, $value) use ($request, &$actualHeaders) {
+                $actualHeaders[$header] = $value;
+                return $request;
+            });
+
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $requestFactory->method('createRequest')->willReturn($request);
+
+        $sut = new PaymentApi(
+            new HttpClient(
+                $this->createPsrClient($response),
+                $requestFactory,
+                $this->createStreamFactory($response->getBody()),
+                new Configuration('secret-key-123', 'https://api.example.com')
+            )
+        );
+
+        $idempotencyKey = 'test-key-123';
+        $result = $sut->charge('1234', $this->createChargeRequest(), $idempotencyKey);
+
+        $this->assertSame('1234', $result->getChargeId());
+
+        $expectedHeaders = [
+            'Authorization' => 'secret-key-123',
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Idempotency-Key' => $idempotencyKey,
+        ];
+
+        foreach ($expectedHeaders as $header => $value) {
+            $this->assertArrayHasKey($header, $actualHeaders, sprintf('%s header was not set', $header));
+            $this->assertSame($value, $actualHeaders[$header], sprintf('%s header value does not match', $header));
+        }
+    }
+
     public function testItUpdatesReferenceInformation(): void
     {
         $response = $this->createResponse([], 200);
@@ -250,6 +298,54 @@ final class PaymentApiTest extends TestCase
         $this->assertSame('1234', $result->getRefundId());
     }
 
+    public function testItRefundsChargeWithIdempotencyKey(): void
+    {
+        $response = $this->createResponse([
+            'refundId' => '1234',
+        ], 200);
+
+        $request = $this->createMock(RequestInterface::class);
+        $request->method('withBody')->willReturnSelf();
+
+        // Track which headers were set
+        $actualHeaders = [];
+        $request->expects($this->exactly(4))
+            ->method('withHeader')
+            ->willReturnCallback(function ($header, $value) use ($request, &$actualHeaders) {
+                $actualHeaders[$header] = $value;
+                return $request;
+            });
+
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $requestFactory->method('createRequest')->willReturn($request);
+
+        $sut = new PaymentApi(
+            new HttpClient(
+                $this->createPsrClient($response),
+                $requestFactory,
+                $this->createStreamFactory($response->getBody()),
+                new Configuration('secret-key-123', 'https://api.example.com')
+            )
+        );
+
+        $idempotencyKey = 'test-key-123';
+        $result = $sut->refundCharge('1234', $this->createRefundChargeRequest(), $idempotencyKey);
+
+        $this->assertSame('1234', $result->getRefundId());
+
+        $expectedHeaders = [
+            'Authorization' => 'secret-key-123',
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Idempotency-Key' => $idempotencyKey,
+        ];
+
+        foreach ($expectedHeaders as $header => $value) {
+            $this->assertArrayHasKey($header, $actualHeaders, sprintf('%s header was not set', $header));
+            $this->assertSame($value, $actualHeaders[$header], sprintf('%s header value does not match', $header));
+        }
+    }
+
     public function testItRefundsPayment(): void
     {
         $response = $this->createResponse([
@@ -261,6 +357,54 @@ final class PaymentApiTest extends TestCase
         $result = $sut->refundPayment('1234', $this->createRefundPaymentRequest());
 
         $this->assertSame('1234', $result->getRefundId());
+    }
+
+    public function testItRefundsPaymentWithIdempotencyKey(): void
+    {
+        $response = $this->createResponse([
+            'refundId' => '1234',
+        ], 200);
+
+        $request = $this->createMock(RequestInterface::class);
+        $request->method('withBody')->willReturnSelf();
+
+        // Track which headers were set
+        $actualHeaders = [];
+        $request->expects($this->exactly(4))
+            ->method('withHeader')
+            ->willReturnCallback(function ($header, $value) use ($request, &$actualHeaders) {
+                $actualHeaders[$header] = $value;
+                return $request;
+            });
+
+        $requestFactory = $this->createStub(RequestFactoryInterface::class);
+        $requestFactory->method('createRequest')->willReturn($request);
+
+        $sut = new PaymentApi(
+            new HttpClient(
+                $this->createPsrClient($response),
+                $requestFactory,
+                $this->createStreamFactory($response->getBody()),
+                new Configuration('secret-key-123', 'https://api.example.com')
+            )
+        );
+
+        $idempotencyKey = 'test-key-123';
+        $result = $sut->refundPayment('1234', $this->createRefundPaymentRequest(), $idempotencyKey);
+
+        $this->assertSame('1234', $result->getRefundId());
+
+        $expectedHeaders = [
+            'Authorization' => 'secret-key-123',
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Idempotency-Key' => $idempotencyKey,
+        ];
+
+        foreach ($expectedHeaders as $header => $value) {
+            $this->assertArrayHasKey($header, $actualHeaders, sprintf('%s header was not set', $header));
+            $this->assertSame($value, $actualHeaders[$header], sprintf('%s header value does not match', $header));
+        }
     }
 
     public function testItCancelsPendingRefund(): void
@@ -417,7 +561,7 @@ final class PaymentApiTest extends TestCase
                 $this->createPsrClient($response),
                 $this->createRequestFactoryStub(),
                 $streamFactory,
-                new Configuration('1234', 'https://api.example.com')
+                new Configuration('secret-key-123', 'https://api.example.com')
             )
         );
     }

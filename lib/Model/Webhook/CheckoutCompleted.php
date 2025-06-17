@@ -91,6 +91,7 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
                 $consumer['firstName'] ?? null,
                 $consumer['lastName'] ?? null,
                 $phoneNumber ? new PhoneNumber($phoneNumber['prefix'], $phoneNumber['number']) : null,
+                $consumer['merchantReference'] ?? null,
             )
         );
     }

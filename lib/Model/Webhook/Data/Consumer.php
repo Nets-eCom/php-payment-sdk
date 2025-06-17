@@ -18,6 +18,7 @@ class Consumer
         private readonly ?string $firstName = null,
         private readonly ?string $lastName = null,
         private readonly ?PhoneNumber $phoneNumber = null,
+        private readonly ?string $merchantReference = null,
     ) {
     }
 
@@ -59,5 +60,10 @@ class Consumer
     public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->phoneNumber;
+    }
+
+    public function getMerchantReference(): ?string
+    {
+        return $this->merchantReference;
     }
 }

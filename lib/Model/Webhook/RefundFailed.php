@@ -1,14 +1,18 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace NexiCheckout\Model\Webhook;
 
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
 use NexiCheckout\Model\Shared\JsonDeserializeTrait;
 use NexiCheckout\Model\Webhook\Data\Amount;
+use NexiCheckout\Model\Webhook\Data\Error;
 use NexiCheckout\Model\Webhook\Data\InvoiceDetails;
-use NexiCheckout\Model\Webhook\Data\RefundCompletedData;
+use NexiCheckout\Model\Webhook\Data\RefundFailedData;
+use NexiCheckout\Model\Webhook\Shared\Data;
 
-class RefundCompleted implements WebhookInterface, JsonDeserializeInterface
+class RefundFailed implements WebhookInterface, JsonDeserializeInterface
 {
     use JsonDeserializeTrait;
 
@@ -17,8 +21,21 @@ class RefundCompleted implements WebhookInterface, JsonDeserializeInterface
         private readonly \DateTimeInterface $timestamp,
         private readonly int $merchantId,
         private readonly EventNameEnum $event,
-        private readonly RefundCompletedData $data,
+        private readonly RefundFailedData $data,
     ) {
+    }
+
+    public static function fromJson(string $string): RefundFailed
+    {
+        $payload = self::jsonDeserialize($string);
+
+        return new self(
+            $payload['id'],
+            new \DateTimeImmutable($payload['timestamp']),
+            $payload['merchantId'],
+            EventNameEnum::from($payload['event']),
+            self::createData($payload['data'])
+        );
     }
 
     public function getId(): string
@@ -41,34 +58,37 @@ class RefundCompleted implements WebhookInterface, JsonDeserializeInterface
         return $this->event;
     }
 
-    public function getData(): RefundCompletedData
+    public function getData(): Data
     {
         return $this->data;
     }
 
-    public static function fromJson(string $string): RefundCompleted
-    {
-        $payload = self::jsonDeserialize($string);
-
-        return new self(
-            $payload['id'],
-            new \DateTimeImmutable($payload['timestamp']),
-            $payload['merchantId'],
-            EventNameEnum::from($payload['event']),
-            self::createRefundCompleted($payload['data'])
-        );
-    }
-
     /**
-     * @param array<string, mixed> $data
+     * @param array{
+     *     paymentId: string,
+     *     error: array{
+     *         code: string,
+     *         message: string,
+     *         source: string
+     *     },
+     *     refundId: string,
+     *     reconciliationReference: string,
+     *     amount: array{
+     *          amount: int,
+     *          currency: string
+     *     },
+     *     invoiceDetails?: array<string, string>
+     * } $data
      */
-    private static function createRefundCompleted(array $data): RefundCompletedData
+    private static function createData(array $data): RefundFailedData
     {
-        return new RefundCompletedData(
-            paymentId: $data['paymentId'],
-            refundId: $data['refundId'],
-            amount: new Amount(...$data['amount']),
-            invoiceDetails: isset($data['invoiceDetails']) ? self::createInvoiceDetails($data['invoiceDetails']) : null,
+        return new RefundFailedData(
+            $data['paymentId'],
+            new Error(...$data['error']),
+            $data['refundId'],
+            $data['reconciliationReference'],
+            new Amount(...$data['amount']),
+            isset($data['invoiceDetails']) ? self::createInvoiceDetails($data['invoiceDetails']) : null
         );
     }
 

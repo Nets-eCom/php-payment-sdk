@@ -1,14 +1,19 @@
 {
     "id": "458a4e068f454f768a40b9e576914820",
-    "merchantId": 100017120,
+    "merchantId": 100242833,
+    "merchantNumber": 0,
     "timestamp": "2021-05-04T22:08:16.6623+02:00",
     "event": "payment.refund.completed",
     "data": {
         "refundId": "00fb000060923e006937598058c4e7f3",
         "invoiceDetails":{
+            "accountNumber": "1234567890",
             "distributionType": "Email",
-            "invoiceDueDate": "2021-01-01T00:00:00",
-            "invoiceNumber": "800328091K1"
+            "invoiceDueDate": "2024-12-31",
+            "invoiceNumber": "1234567890",
+            "ocrOrkid": "1234567890",
+            "ourReference": "1234567890",
+            "yourReference": "9876543210"
         },
         "amount": {
             "amount": 5500,

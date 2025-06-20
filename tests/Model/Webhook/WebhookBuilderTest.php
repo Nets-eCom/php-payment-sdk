@@ -9,6 +9,7 @@ use NexiCheckout\Model\Webhook\ChargeCreated;
 use NexiCheckout\Model\Webhook\CheckoutCompleted;
 use NexiCheckout\Model\Webhook\PaymentCreated;
 use NexiCheckout\Model\Webhook\RefundCompleted;
+use NexiCheckout\Model\Webhook\RefundFailed;
 use NexiCheckout\Model\Webhook\ReservationCreated;
 use NexiCheckout\Model\Webhook\ReservationCreatedV1;
 use NexiCheckout\Model\Webhook\ReservationFailed;
@@ -61,7 +62,16 @@ final class WebhookBuilderTest extends TestCase
             'payment.refund.completed',
             RefundCompleted::class,
             [
+                'merchantId' => 100242833,
+                'data.amount.amount' => 5500,
+                'data.amount.currency' => 'SEK',
                 'data.paymentId' => '025400006091b1ef6937598058c4e487',
+                'data.invoiceDetails.accountNumber' => '1234567890',
+                'data.invoiceDetails.distributionType' => 'Email',
+                'data.invoiceDetails.invoiceNumber' => '1234567890',
+                'data.invoiceDetails.ocrOrkid' => '1234567890',
+                'data.invoiceDetails.ourReference' => '1234567890',
+                'data.invoiceDetails.yourReference' => '9876543210',
             ],
         ];
 
@@ -133,6 +143,29 @@ final class WebhookBuilderTest extends TestCase
             PaymentCreated::class,
             [
                 'data.paymentId' => 'b015690c89d141f7b98b99dee769be62',
+            ],
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.refund.failed.json'),
+            'payment.refund.failed',
+            RefundFailed::class,
+            [
+                'merchantId' => 100242833,
+                'data.paymentId' => 'b015690c89d141f7b98b99dee769be62',
+                'data.error.code' => '911',
+                'data.error.message' => 'Error occurred',
+                'data.error.source' => 'Internal',
+                'data.refundId' => '32e1cb8de6704c4baf9974121cc1351f',
+                'data.reconciliationReference' => 'MRJhJvEDCx1y7uWlKfb6O3z78',
+                'data.amount.amount' => 10000,
+                'data.amount.currency' => 'SEK',
+                'data.invoiceDetails.accountNumber' => '1234567890',
+                'data.invoiceDetails.distributionType' => 'Email',
+                'data.invoiceDetails.invoiceNumber' => '1234567890',
+                'data.invoiceDetails.ocrOrkid' => '1234567890',
+                'data.invoiceDetails.ourReference' => '1234567890',
+                'data.invoiceDetails.yourReference' => '9876543210',
             ],
         ];
     }

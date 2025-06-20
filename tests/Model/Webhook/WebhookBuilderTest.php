@@ -11,6 +11,7 @@ use NexiCheckout\Model\Webhook\PaymentCreated;
 use NexiCheckout\Model\Webhook\RefundCompleted;
 use NexiCheckout\Model\Webhook\ReservationCreated;
 use NexiCheckout\Model\Webhook\ReservationCreatedV1;
+use NexiCheckout\Model\Webhook\ReservationFailed;
 use NexiCheckout\Model\Webhook\WebhookBuilder;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -112,6 +113,17 @@ final class WebhookBuilderTest extends TestCase
             ReservationCreated::class,
             [
                 'data.paymentId' => 'b015690c89d141f7b98b99dee769be62',
+            ],
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.reservation.failed.json'),
+            'payment.reservation.failed',
+            ReservationFailed::class,
+            [
+                'data.paymentId' => 'b015690c89d141f7b98b99dee769be62',
+                'data.error.code' => '911',
+                'data.amount.amount' => 10000,
             ],
         ];
 

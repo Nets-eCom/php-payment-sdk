@@ -17,7 +17,7 @@ class WebhookBuilder
             EventNameEnum::PAYMENT_CREATED => PaymentCreated::fromJson($string),
             EventNameEnum::PAYMENT_RESERVATION_CREATED => ReservationCreatedV1::fromJson($string),
             EventNameEnum::PAYMENT_RESERVATION_CREATED_V2 => ReservationCreated::fromJson($string),
-            EventNameEnum::PAYMENT_RESERVATION_FAILED => null /* @todo */,
+            EventNameEnum::PAYMENT_RESERVATION_FAILED => ReservationFailed::fromJson($string),
             EventNameEnum::PAYMENT_CHECKOUT_COMPLETED => CheckoutCompleted::fromJson($string),
             EventNameEnum::PAYMENT_CHARGE_CREATED => ChargeCreated::fromJson($string),
             EventNameEnum::PAYMENT_CHARGE_FAILED => null /* @todo */,

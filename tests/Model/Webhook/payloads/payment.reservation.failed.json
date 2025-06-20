@@ -1,0 +1,31 @@
+{
+    "id": "6df820a8cef54dfba4ba6737b34e7b34",
+    "event": "payment.reservation.failed",
+    "timestamp": "2025-06-13T05:05:39.3105+00:00",
+    "merchantId": 100242833,
+    "data": {
+        "error": {
+            "code": "911",
+            "message": "Error occurred",
+            "source": "Internal"
+        },
+        "orderItems": [
+            {
+                "grossTotalAmount": 10000,
+                "name": "Product 1",
+                "netTotalAmount": 8000,
+                "quantity": 2,
+                "reference": "Red shoe 12",
+                "taxRate": 20,
+                "taxAmount": 2000,
+                "unit": "pcs",
+                "unitPrice": 4000
+            }
+        ],
+        "amount": {
+            "amount": 10000,
+            "currency": "SEK"
+        },
+        "paymentId": "b015690c89d141f7b98b99dee769be62"
+    }
+}

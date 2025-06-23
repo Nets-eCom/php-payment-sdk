@@ -25,7 +25,7 @@ class WebhookBuilder
             EventNameEnum::PAYMENT_REFUND_FAILED => RefundFailed::fromJson($string),
             EventNameEnum::PAYMENT_REFUND_COMPLETED => RefundCompleted::fromJson($string),
             EventNameEnum::PAYMENT_CANCEL_CREATED => CancelCreated::fromJson($string),
-            EventNameEnum::PAYMENT_CANCEL_FAILED => null /* @todo */,
+            EventNameEnum::PAYMENT_CANCEL_FAILED => CancelFailed::fromJson($string),
         };
     }
 }

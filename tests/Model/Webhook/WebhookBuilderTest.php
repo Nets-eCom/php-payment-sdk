@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NexiCheckout\Tests\Model\Webhook;
 
 use NexiCheckout\Model\Webhook\CancelCreated;
+use NexiCheckout\Model\Webhook\CancelFailed;
 use NexiCheckout\Model\Webhook\ChargeCreated;
 use NexiCheckout\Model\Webhook\CheckoutCompleted;
 use NexiCheckout\Model\Webhook\PaymentCreated;
@@ -166,6 +167,22 @@ final class WebhookBuilderTest extends TestCase
                 'data.invoiceDetails.ocrOrkid' => '1234567890',
                 'data.invoiceDetails.ourReference' => '1234567890',
                 'data.invoiceDetails.yourReference' => '9876543210',
+            ],
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.cancel.failed.json'),
+            'payment.cancel.failed',
+            CancelFailed::class,
+            [
+                'merchantId' => 100242833,
+                'data.paymentId' => 'b015690c89d141f7b98b99dee769be62',
+                'data.error.code' => '911',
+                'data.error.message' => 'Error occurred',
+                'data.error.source' => 'Internal',
+                'data.cancelId' => '1234',
+                'data.amount.amount' => 10000,
+                'data.amount.currency' => 'SEK',
             ],
         ];
     }

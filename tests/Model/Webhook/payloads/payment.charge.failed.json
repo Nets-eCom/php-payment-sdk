@@ -1,0 +1,42 @@
+{
+  "id": "a1a70eba60e2478eae4b5e75e806bbf5",
+  "event": "payment.charge.failed",
+  "timestamp": "2025-06-13T05:05:39.3102+00:00",
+  "merchantId": 100242833,
+  "data": {
+    "error": {
+      "code": "911",
+      "message": "Error occurred",
+      "source": "Internal"
+    },
+    "chargeId": "e9f346328d684bf59f6cac006dbb2ec4",
+    "orderItems": [
+      {
+        "reference": "Sneaky NE2816-82",
+        "name": "Sneaky",
+        "quantity": 2.0,
+        "unit": "pcs",
+        "unitPrice": 2500,
+        "taxRate": 1000,
+        "taxAmount": 500,
+        "netTotalAmount": 5000,
+        "grossTotalAmount": 5500
+      }
+    ],
+    "invoiceDetails": {
+      "accountNumber": "1234567890",
+      "distributionType": "Email",
+      "invoiceDueDate": "2024-12-31",
+      "invoiceNumber": "1234567890",
+      "ocrOrkid": "1234567890",
+      "ourReference": "1234567890",
+      "yourReference": "9876543210"
+    },
+    "reconciliationReference": "MRJhJvEDCx1y7uWlKfb6O3z78",
+    "amount": {
+      "amount": 10000,
+      "currency": "SEK"
+    },
+    "paymentId": "74d6fcdd11e2486c987d526250d1258f"
+  }
+}

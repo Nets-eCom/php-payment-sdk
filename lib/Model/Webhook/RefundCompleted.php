@@ -2,15 +2,16 @@
 
 namespace NexiCheckout\Model\Webhook;
 
+use NexiCheckout\Model\Shared\InvoiceDatailsTrait;
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
 use NexiCheckout\Model\Shared\JsonDeserializeTrait;
 use NexiCheckout\Model\Webhook\Data\Amount;
-use NexiCheckout\Model\Webhook\Data\InvoiceDetails;
 use NexiCheckout\Model\Webhook\Data\RefundCompletedData;
 
 class RefundCompleted implements WebhookInterface, JsonDeserializeInterface
 {
     use JsonDeserializeTrait;
+    use InvoiceDatailsTrait;
 
     public function __construct(
         private readonly string $id,
@@ -69,30 +70,6 @@ class RefundCompleted implements WebhookInterface, JsonDeserializeInterface
             refundId: $data['refundId'],
             amount: new Amount(...$data['amount']),
             invoiceDetails: isset($data['invoiceDetails']) ? self::createInvoiceDetails($data['invoiceDetails']) : null,
-        );
-    }
-
-    /**
-     * @param array{
-     *     invoiceNumber: string,
-     *     accountNumber: ?string,
-     *     distributionType: ?string,
-     *     invoiceDueDate: ?string,
-     *     ocrOrkid: ?string,
-     *     ourReference: ?string,
-     *     yourReference: ?string
-     * } $data
-     */
-    private static function createInvoiceDetails(array $data): InvoiceDetails
-    {
-        return new InvoiceDetails(
-            $data['invoiceNumber'],
-            $data['accountNumber'] ?? null,
-            $data['distributionType'] ?? null,
-            $data['invoiceDueDate'] ? new \DateTimeImmutable($data['invoiceDueDate']) : null,
-            $data['ocrOrkid'] ?? null,
-            $data['ourReference'] ?? null,
-            $data['yourReference'] ?? null
         );
     }
 }

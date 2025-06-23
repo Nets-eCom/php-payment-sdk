@@ -7,6 +7,7 @@ namespace NexiCheckout\Tests\Model\Webhook;
 use NexiCheckout\Model\Webhook\CancelCreated;
 use NexiCheckout\Model\Webhook\CancelFailed;
 use NexiCheckout\Model\Webhook\ChargeCreated;
+use NexiCheckout\Model\Webhook\ChargeFailed;
 use NexiCheckout\Model\Webhook\CheckoutCompleted;
 use NexiCheckout\Model\Webhook\PaymentCreated;
 use NexiCheckout\Model\Webhook\RefundCompleted;
@@ -55,6 +56,29 @@ final class WebhookBuilderTest extends TestCase
                 'data.paymentMethod' => 'Visa',
                 'data.amount.amount' => 5500,
                 'data.amount.currency' => 'SEK',
+            ],
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.charge.failed.json'),
+            'payment.charge.failed',
+            ChargeFailed::class,
+            [
+                'merchantId' => 100242833,
+                'data.paymentId' => '74d6fcdd11e2486c987d526250d1258f',
+                'data.error.code' => '911',
+                'data.error.message' => 'Error occurred',
+                'data.error.source' => 'Internal',
+                'data.chargeId' => 'e9f346328d684bf59f6cac006dbb2ec4',
+                'data.reconciliationReference' => 'MRJhJvEDCx1y7uWlKfb6O3z78',
+                'data.amount.amount' => 10000,
+                'data.amount.currency' => 'SEK',
+                'data.invoiceDetails.accountNumber' => '1234567890',
+                'data.invoiceDetails.distributionType' => 'Email',
+                'data.invoiceDetails.invoiceNumber' => '1234567890',
+                'data.invoiceDetails.ocrOrkid' => '1234567890',
+                'data.invoiceDetails.ourReference' => '1234567890',
+                'data.invoiceDetails.yourReference' => '9876543210',
             ],
         ];
 

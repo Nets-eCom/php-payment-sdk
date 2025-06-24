@@ -12,6 +12,7 @@ use NexiCheckout\Model\Webhook\CheckoutCompleted;
 use NexiCheckout\Model\Webhook\PaymentCreated;
 use NexiCheckout\Model\Webhook\RefundCompleted;
 use NexiCheckout\Model\Webhook\RefundFailed;
+use NexiCheckout\Model\Webhook\RefundInitiated;
 use NexiCheckout\Model\Webhook\ReservationCreated;
 use NexiCheckout\Model\Webhook\ReservationCreatedV1;
 use NexiCheckout\Model\Webhook\ReservationFailed;
@@ -159,6 +160,20 @@ final class WebhookBuilderTest extends TestCase
                 'data.paymentId' => 'b015690c89d141f7b98b99dee769be62',
                 'data.error.code' => '911',
                 'data.amount.amount' => 10000,
+            ],
+        ];
+
+        yield [
+            file_get_contents(__DIR__ . '/payloads/payment.refund.initiated.v2.json'),
+            'payment.refund.initiated.v2',
+            RefundInitiated::class,
+            [
+                'merchantId' => 100017120,
+                'data.paymentId' => '025400006091b1ef6937598058c4e487',
+                'data.reconciliationReference' => '12345',
+                'data.paymentActionId' => '12345',
+                'data.amount.amount' => 5500,
+                'data.amount.currency' => 'SEK',
             ],
         ];
 

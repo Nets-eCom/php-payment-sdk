@@ -35,7 +35,7 @@ class RefundFailed implements WebhookInterface, JsonDeserializeInterface
             new \DateTimeImmutable($payload['timestamp']),
             $payload['merchantId'],
             EventNameEnum::from($payload['event']),
-            self::createData($payload['data'])
+            self::createRefundFailedData($payload['data'])
         );
     }
 
@@ -81,7 +81,7 @@ class RefundFailed implements WebhookInterface, JsonDeserializeInterface
      *     invoiceDetails?: array<string, string>
      * } $data
      */
-    private static function createData(array $data): RefundFailedData
+    private static function createRefundFailedData(array $data): RefundFailedData
     {
         return new RefundFailedData(
             $data['paymentId'],

@@ -7,21 +7,20 @@ namespace NexiCheckout\Model\Webhook;
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
 use NexiCheckout\Model\Shared\JsonDeserializeTrait;
 use NexiCheckout\Model\Webhook\Data\Amount;
-use NexiCheckout\Model\Webhook\Data\CancelFailedData;
-use NexiCheckout\Model\Webhook\Data\Error;
 use NexiCheckout\Model\Webhook\Data\OrderItem;
+use NexiCheckout\Model\Webhook\Data\RefundInitiatedData;
 use NexiCheckout\Model\Webhook\Shared\Data;
 
-class CancelFailed implements WebhookInterface, JsonDeserializeInterface
+class RefundInitiated implements WebhookInterface, JsonDeserializeInterface
 {
     use JsonDeserializeTrait;
 
     public function __construct(
         private readonly string $id,
+        private readonly int $merchantId,
         private readonly EventNameEnum $event,
         private readonly \DateTimeInterface $timestamp,
-        private readonly int $merchantId,
-        private readonly CancelFailedData $data
+        private readonly RefundInitiatedData $data
     ) {
     }
 
@@ -40,16 +39,16 @@ class CancelFailed implements WebhookInterface, JsonDeserializeInterface
         return $this->merchantId;
     }
 
-    public static function fromJson(string $string): CancelFailed
+    public static function fromJson(string $string): RefundInitiated
     {
         $payload = self::jsonDeserialize($string);
 
         return new self(
             $payload['id'],
+            $payload['merchantId'],
             EventNameEnum::from($payload['event']),
             new \DateTimeImmutable($payload['timestamp']),
-            $payload['merchantId'],
-            self::createCancelFailedData($payload['data'])
+            self::createRefundInitiatedData($payload['data'])
         );
     }
 
@@ -66,12 +65,6 @@ class CancelFailed implements WebhookInterface, JsonDeserializeInterface
     /**
      * @param array{
      *     paymentId: string,
-     *     error: array{
-     *         code: string,
-     *         message: string,
-     *         source: string
-     *     },
-     *     cancelId: string,
      *     orderItems: list<array{
      *         reference: string,
      *         name: string,
@@ -87,18 +80,20 @@ class CancelFailed implements WebhookInterface, JsonDeserializeInterface
      *         amount: int,
      *         currency: string
      *     },
-     *     myReference: ?string,
+     *     reconciliationReference: string,
+     *     executed: string,
+     *     paymentActionId: string,
      * } $data
      */
-    private static function createCancelFailedData(array $data): CancelFailedData
+    private static function createRefundInitiatedData(array $data): RefundInitiatedData
     {
-        return new CancelFailedData(
+        return new RefundInitiatedData(
             $data['paymentId'],
-            new Error(...$data['error']),
-            $data['cancelId'],
             array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $data['orderItems']),
             new Amount(...$data['amount']),
-            $data['myReference'] ?? null,
+            $data['reconciliationReference'],
+            new \DateTimeImmutable($data['executed']),
+            $data['paymentActionId'],
         );
     }
 }

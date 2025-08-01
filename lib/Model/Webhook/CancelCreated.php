@@ -67,8 +67,8 @@ class CancelCreated implements WebhookInterface, JsonDeserializeInterface
         return new CancelCreatedData(
             paymentId: $data['paymentId'],
             cancelId: $data['cancelId'],
-            amount: new Amount(...$data['amount']),
             orderItems: array_map(fn (array $orderItem) => new OrderItem(...$orderItem), $data['orderItems']),
+            amount: new Amount(...$data['amount']),
         );
     }
 }

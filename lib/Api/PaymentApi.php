@@ -7,6 +7,7 @@ namespace NexiCheckout\Api;
 use NexiCheckout\Api\Exception\ClientErrorPaymentApiException;
 use NexiCheckout\Api\Exception\InternalErrorPaymentApiException;
 use NexiCheckout\Api\Exception\PaymentApiException;
+use NexiCheckout\Api\Exception\UnauthorizedApiException;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Model\Request\Cancel;
@@ -366,7 +367,7 @@ class PaymentApi
         return match (true) {
             $code >= 300 && $code < 400 => new PaymentApiException('Redirection not supported'),
             $code === 400 => new ClientErrorPaymentApiException(\sprintf('Client error: %s', $contents), $contents),
-            $code === 401 => new PaymentApiException(\sprintf('Unauthorized: %s', $contents)),
+            $code === 401 => new UnauthorizedApiException(\sprintf('Unauthorized: %s', $contents)),
             $code === 404 => new PaymentApiException(\sprintf('Client error: %s', $contents)),
             $code >= 402 && $code < 500 => new InternalErrorPaymentApiException($contents),
             $code >= 500 && $code < 600 => new PaymentApiException(\sprintf('Server error occurred: %s', $contents)),

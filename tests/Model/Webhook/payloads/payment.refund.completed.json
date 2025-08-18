@@ -1,7 +1,6 @@
 {
     "id": "458a4e068f454f768a40b9e576914820",
     "merchantId": 100242833,
-    "merchantNumber": 0,
     "timestamp": "2021-05-04T22:08:16.6623+02:00",
     "event": "payment.refund.completed",
     "data": {

@@ -19,7 +19,7 @@ class PaymentCreated implements WebhookInterface, JsonDeserializeInterface
     public function __construct(
         private readonly string $id,
         private readonly \DateTimeInterface $timestamp,
-        private readonly int $merchantNumber,
+        private readonly int $merchantId,
         private readonly EventNameEnum $event,
         private readonly PaymentCreatedData $data,
     ) {
@@ -32,7 +32,7 @@ class PaymentCreated implements WebhookInterface, JsonDeserializeInterface
         return new self(
             id: $payload['id'],
             timestamp: new \DateTimeImmutable($payload['timestamp']),
-            merchantNumber: $payload['merchantNumber'],
+            merchantId: $payload['merchantId'],
             event: EventNameEnum::from($payload['event']),
             data: self::createPaymentCreatedData($payload['data'])
         );
@@ -58,9 +58,9 @@ class PaymentCreated implements WebhookInterface, JsonDeserializeInterface
         return $this->timestamp;
     }
 
-    public function getMerchantNumber(): int
+    public function getMerchantId(): int
     {
-        return $this->merchantNumber;
+        return $this->merchantId;
     }
 
     /**

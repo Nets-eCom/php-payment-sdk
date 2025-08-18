@@ -3,7 +3,6 @@
     "event": "payment.reservation.created",
     "timestamp": "2025-06-17T05:07:13.4460+00:00",
     "merchantId": 100242833,
-    "merchantNumber": 0,
     "data": {
         "cardDetails": {
             "creditDebitIndicator": "C",

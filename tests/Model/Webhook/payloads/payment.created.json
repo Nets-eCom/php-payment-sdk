@@ -3,7 +3,6 @@
   "event": "payment.created",
   "timestamp": "2025-05-18T05:04:09.3273+00:00",
   "merchantId": 100242833,
-  "merchantNumber": 0,
   "data": {
     "order": {
       "amount": {

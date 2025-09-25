@@ -18,6 +18,7 @@ use NexiCheckout\Model\Request\MyReference;
 use NexiCheckout\Model\Request\Payment;
 use NexiCheckout\Model\Request\Payment\HostedCheckout;
 use NexiCheckout\Model\Request\Payment\MethodConfiguration;
+use NexiCheckout\Model\Request\PaymentMethods;
 use NexiCheckout\Model\Request\ReferenceInformation;
 use NexiCheckout\Model\Request\RefundCharge;
 use NexiCheckout\Model\Request\RefundPayment;
@@ -427,8 +428,44 @@ final class PaymentApiTest extends TestCase
         $sut->cancelPendingRefund('1234');
     }
 
+    public function testItGetsPaymentMethods(): void
+    {
+        $payload = [
+            [
+                'name' => 'Visa',
+                'paymentType' => 'CARD',
+                'currency' => 'EUR',
+                'enabled' => true,
+            ],
+            [
+                'name' => 'PayPal',
+                'paymentType' => 'WALLET',
+                'currency' => 'EUR',
+                'enabled' => false,
+            ],
+        ];
+        $response = $this->createResponse($payload, 200);
+
+        $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
+
+        $result = $sut->getPaymentMethods(new PaymentMethods('123456', 'EUR', null));
+        $methods = $result->getMethods();
+
+        $this->assertCount(2, $methods);
+
+        $this->assertSame('Visa', $methods[0]->getName());
+        $this->assertSame('CARD', $methods[0]->getPaymentType());
+        $this->assertSame('EUR', $methods[0]->getCurrency());
+        $this->assertTrue($methods[0]->isEnabled());
+
+        $this->assertSame('PayPal', $methods[1]->getName());
+        $this->assertSame('WALLET', $methods[1]->getPaymentType());
+        $this->assertSame('EUR', $methods[1]->getCurrency());
+        $this->assertFalse($methods[1]->isEnabled());
+    }
+
     /**
-     * @param array<string, mixed> $data
+     * @param array<int|string, mixed> $data
      */
     private function createResponse(array $data, int $code): ResponseInterface
     {

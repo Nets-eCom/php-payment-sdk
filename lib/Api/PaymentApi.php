@@ -14,6 +14,7 @@ use NexiCheckout\Model\Request\Cancel;
 use NexiCheckout\Model\Request\Charge;
 use NexiCheckout\Model\Request\MyReference;
 use NexiCheckout\Model\Request\Payment;
+use NexiCheckout\Model\Request\PaymentMethods;
 use NexiCheckout\Model\Request\ReferenceInformation;
 use NexiCheckout\Model\Request\RefundCharge;
 use NexiCheckout\Model\Request\RefundPayment;
@@ -21,6 +22,7 @@ use NexiCheckout\Model\Request\UpdateOrder;
 use NexiCheckout\Model\Result\ChargeResult;
 use NexiCheckout\Model\Result\Payment\PaymentWithEmbeddedCheckoutResult;
 use NexiCheckout\Model\Result\Payment\PaymentWithHostedCheckoutResult;
+use NexiCheckout\Model\Result\PaymentMethodsResult\PaymentMethodsResult;
 use NexiCheckout\Model\Result\RefundChargeResult;
 use NexiCheckout\Model\Result\RefundPaymentResult;
 use NexiCheckout\Model\Result\RetrievePaymentResult;
@@ -48,6 +50,8 @@ class PaymentApi
     private const PENDING_REFUNDS_ENDPOINT = '/v1/pending-refunds';
 
     private const REFUND_CANCELS = '/cancel';
+
+    private const PAYMENT_METHODS_ENDPOINT = '/v1/paymentmethods';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -347,6 +351,50 @@ class PaymentApi
         if (!$this->isSuccessCode($code)) {
             throw $this->createPaymentApiException($code, $response->getBody()->getContents());
         }
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function getPaymentMethods(PaymentMethods $request): PaymentMethodsResult
+    {
+        $params = [];
+        if ($request->getMerchantNumber() !== null) {
+            $params['MerchantNumber'] = $request->getMerchantNumber();
+        }
+
+        if ($request->getCurrency() !== null) {
+            $params['Currency'] = $request->getCurrency();
+        }
+
+        if ($request->getEnabled() !== null) {
+            $params['Enabled'] = $request->getEnabled() ? 'true' : 'false';
+        }
+
+        $path = self::PAYMENT_METHODS_ENDPOINT;
+        if ($params !== []) {
+            $path .= '?' . \http_build_query($params, '', '&', \PHP_QUERY_RFC3986);
+        }
+
+        try {
+            $response = $this->client->get($path);
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                'Couldn\'t get payment methods',
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return PaymentMethodsResult::fromJson($contents);
     }
 
     private function getPaymentOperationPath(string $paymentId, string $operation): string

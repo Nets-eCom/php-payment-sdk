@@ -17,7 +17,21 @@ class ClientErrorPaymentApiException extends PaymentApiException
     ) {
         parent::__construct($message, $code, $previous);
 
-        $this->errors = json_decode($errors, true, 512, \JSON_THROW_ON_ERROR)['errors'];
+        $errorsBody = json_decode($errors, true, 512, \JSON_THROW_ON_ERROR);
+        if (isset($errorsBody['errors']) && is_array($errorsBody['errors'])) {
+            $this->errors = $errorsBody['errors'];
+            return;
+        }
+
+        if (is_array($errorsBody)) {
+            $this->errors = $errorsBody;
+            return;
+        }
+
+        $this->errors = [
+            'error' => ['Unknown api error'],
+        ];
+
     }
 
     /**

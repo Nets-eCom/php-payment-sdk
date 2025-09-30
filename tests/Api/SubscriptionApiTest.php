@@ -8,8 +8,11 @@ use NexiCheckout\Api\SubscriptionApi;
 use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
+use NexiCheckout\Model\Request\ChargeSubscription;
+use NexiCheckout\Model\Request\Item;
 use NexiCheckout\Model\Request\Shared\Notification;
 use NexiCheckout\Model\Request\Shared\Notification\Webhook;
+use NexiCheckout\Model\Request\Shared\Order;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Request\VerifySubscriptions\Subscription;
 use NexiCheckout\Model\Result\RetrieveBulkVerifications\VerificationStatusEnum;
@@ -171,6 +174,24 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame($bulkId, $result->getBulkId());
     }
 
+    public function testItChargesSubscription(): void
+    {
+        $paymentId = '472e651e-5a1e-424d-8098-23858bf03ad7';
+        $chargeId = 'aec0aceb-a4db-49fb-b366-75e90229c640';
+
+        $response = $this->createResponse([
+            'paymentId' => $paymentId,
+            'chargeId' => $chargeId,
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->chargeSubscription('subscriptionId', $this->createChargeSubscriptionRequest(), null);
+
+        $this->assertSame($paymentId, $result->getPaymentId());
+        $this->assertSame($chargeId, $result->getChargeId());
+    }
+
     /**
      * @param array<string, mixed> $data
      */
@@ -208,6 +229,28 @@ final class SubscriptionApiTest extends TestCase
             'foo',
             new Notification([new Webhook('foo', 'bar', 'baz')]),
             []
+        );
+    }
+
+    private function createChargeSubscriptionRequest(): ChargeSubscription
+    {
+        return new ChargeSubscription(
+            new Order(
+                [
+                    new Item(
+                        'item',
+                        1,
+                        'pcs',
+                        100,
+                        100,
+                        100,
+                        'ref'
+                    ),
+                ],
+                'SEK',
+                100
+            ),
+            new Notification([new Webhook('foo', 'bar', 'baz')]),
         );
     }
 

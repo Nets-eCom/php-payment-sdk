@@ -10,11 +10,13 @@ use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
+use NexiCheckout\Model\Request\ChargeSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
+use NexiCheckout\Model\Result\SubscriptionCharges\SingleSubscriptionCharge;
 use NexiCheckout\Model\Result\VerifySubscriptionsResult;
 
 class SubscriptionApi
@@ -24,6 +26,8 @@ class SubscriptionApi
     private const SUBSCRIPTION_CHARGES_BULK = self::SUBSCRIPTIONS_ENDPOINT . '/charges';
 
     private const SUBSCRIPTION_VERIFICATIONS = self::SUBSCRIPTIONS_ENDPOINT . '/verifications';
+
+    private const SUBSCRIPTION_CHARGES = self::SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -137,6 +141,41 @@ class SubscriptionApi
         }
 
         return VerifySubscriptionsResult::fromJson($contents);
+    }
+
+    public function chargeSubscription(string $subscriptionId, ChargeSubscription $chargeSubscription, ?string $idempotencyKey = null): SingleSubscriptionCharge
+    {
+        try {
+            $headers = [];
+            if ($idempotencyKey !== null) {
+                $headers['Idempotency-Key'] = $idempotencyKey;
+            }
+
+            $response = $this->client->post(
+                \sprintf(
+                    self::SUBSCRIPTION_CHARGES,
+                    $subscriptionId
+                ),
+                json_encode($chargeSubscription),
+                $headers
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf('Couldn\'t retrieve charge for subscription with ID: %s', $subscriptionId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return SingleSubscriptionCharge::fromJson($contents);
+
     }
 
     /**

@@ -8,8 +8,10 @@ use NexiCheckout\Api\Exception\ClientErrorPaymentApiException;
 use NexiCheckout\Api\Exception\InternalErrorPaymentApiException;
 use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Api\Exception\UnauthorizedApiException;
+use NexiCheckout\Http\Header\IdempotencyKey;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
+use NexiCheckout\Http\RequestHeaderOptions;
 use NexiCheckout\Model\Request\Cancel;
 use NexiCheckout\Model\Request\Charge;
 use NexiCheckout\Model\Request\MyReference;
@@ -229,12 +231,11 @@ class PaymentApi
     public function charge(string $paymentId, Charge $charge, ?string $idempotencyKey = null): ChargeResult
     {
         try {
-            $headers = [];
-            if ($idempotencyKey !== null) {
-                $headers['Idempotency-Key'] = $idempotencyKey;
-            }
-
-            $response = $this->client->post($this->getPaymentOperationPath($paymentId, self::PAYMENT_CHARGES), json_encode($charge), $headers);
+            $response = $this->client->post(
+                $this->getPaymentOperationPath($paymentId, self::PAYMENT_CHARGES),
+                json_encode($charge),
+                $this->idempotencyOptions($idempotencyKey)
+            );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 \sprintf('Couldn\'t create charge for a given payment id: %s', $paymentId),
@@ -259,15 +260,10 @@ class PaymentApi
     public function refundCharge(string $chargeId, RefundCharge $refund, ?string $idempotencyKey = null): RefundChargeResult
     {
         try {
-            $headers = [];
-            if ($idempotencyKey !== null) {
-                $headers['Idempotency-Key'] = $idempotencyKey;
-            }
-
             $response = $this->client->post(
                 \sprintf('%s/%s%s', self::CHARGES_ENDPOINT, $chargeId, self::REFUNDS),
                 json_encode($refund),
-                $headers
+                $this->idempotencyOptions($idempotencyKey)
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
@@ -294,15 +290,10 @@ class PaymentApi
     public function refundPayment(string $paymentId, RefundPayment $refundPayment, ?string $idempotencyKey = null): RefundPaymentResult
     {
         try {
-            $headers = [];
-            if ($idempotencyKey !== null) {
-                $headers['Idempotency-Key'] = $idempotencyKey;
-            }
-
             $response = $this->client->post(
                 $this->getPaymentOperationPath($paymentId, self::REFUNDS),
                 json_encode($refundPayment),
-                $headers
+                $this->idempotencyOptions($idempotencyKey)
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
@@ -421,6 +412,15 @@ class PaymentApi
             $code >= 500 && $code < 600 => new PaymentApiException(\sprintf('Server error occurred: %s', $contents)),
             default => new PaymentApiException(\sprintf('Unexpected status code: %d', $code)),
         };
+    }
+
+    private function idempotencyOptions(?string $key): ?RequestHeaderOptions
+    {
+        if ($key === null) {
+            return null;
+        }
+
+        return RequestHeaderOptions::create()->with(new IdempotencyKey($key));
     }
 
     /**

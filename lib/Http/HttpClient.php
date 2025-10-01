@@ -10,6 +10,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use function array_merge;
 
 class HttpClient
 {
@@ -24,28 +25,24 @@ class HttpClient
     /**
      * @throws HttpClientException
      */
-    public function get(string $path): ResponseInterface
+    public function get(string $path, ?RequestHeaderOptions $options = null): ResponseInterface
     {
         return $this->send(
             $this->createRequest(
                 $this->createUrl($path),
-                'GET'
-            )->withHeader('Accept', 'application/json')
+                'GET',
+                $options
+            )
         );
     }
 
     /**
-     * @param array<string, string> $additionalHeaders
      * @throws HttpClientException
      */
-    public function post(string $path, string $body, array $additionalHeaders = []): ResponseInterface
+    public function post(string $path, string $body, ?RequestHeaderOptions $options = null): ResponseInterface
     {
-        $request = $this->createRequest($this->createUrl($path), 'POST')
+        $request = $this->createRequest($this->createUrl($path), 'POST', $options)
             ->withBody($this->streamFactory->createStream($body));
-
-        foreach ($additionalHeaders as $key => $value) {
-            $request = $request->withHeader($key, $value);
-        }
 
         return $this->send($request);
     }
@@ -53,14 +50,15 @@ class HttpClient
     /**
      * @throws HttpClientException
      */
-    public function put(string $path, string $body): ResponseInterface
+    public function put(string $path, string $body, ?RequestHeaderOptions $options = null): ResponseInterface
     {
         return $this->send(
-            $this->createRequest($this->createUrl($path), 'PUT')->withBody($this->streamFactory->createStream($body))
+            $this->createRequest($this->createUrl($path), 'PUT', $options)
+                ->withBody($this->streamFactory->createStream($body))
         );
     }
 
-    private function createRequest(string $url, string $method): RequestInterface
+    private function createRequest(string $url, string $method, ?RequestHeaderOptions $options): RequestInterface
     {
         $request = $this->requestFactory->createRequest($method, $url);
 
@@ -74,6 +72,10 @@ class HttpClient
 
         if ($commercePlatformTag !== null) {
             $headers['CommercePlatformTag'] = $commercePlatformTag;
+        }
+
+        if ($options instanceof RequestHeaderOptions) {
+            $headers = array_merge($headers, $options->toHeaders());
         }
 
         foreach ($headers as $key => $value) {

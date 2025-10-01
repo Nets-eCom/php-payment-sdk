@@ -241,7 +241,7 @@ final class PaymentApiTest extends TestCase
                 $requestFactory,
                 $this->createStreamFactory($response->getBody()),
                 new Configuration('secret-key-123', 'https://api.example.com')
-            )
+            ),
         );
 
         $idempotencyKey = 'test-key-123';
@@ -337,7 +337,7 @@ final class PaymentApiTest extends TestCase
                 $requestFactory,
                 $this->createStreamFactory($response->getBody()),
                 new Configuration('secret-key-123', 'https://api.example.com')
-            )
+            ),
         );
 
         $idempotencyKey = 'test-key-123';
@@ -398,7 +398,7 @@ final class PaymentApiTest extends TestCase
                 $requestFactory,
                 $this->createStreamFactory($response->getBody()),
                 new Configuration('secret-key-123', 'https://api.example.com')
-            )
+            ),
         );
 
         $idempotencyKey = 'test-key-123';
@@ -610,7 +610,7 @@ final class PaymentApiTest extends TestCase
                 $this->createRequestFactoryStub(),
                 $streamFactory,
                 new Configuration('secret-key-123', 'https://api.example.com')
-            )
+            ),
         );
     }
 

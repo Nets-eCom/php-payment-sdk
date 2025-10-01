@@ -274,7 +274,7 @@ final class SubscriptionApiTest extends TestCase
                 $this->createRequestFactoryStub(),
                 $streamFactory,
                 new Configuration('1234', 'https://api.example.com')
-            )
+            ),
         );
     }
 

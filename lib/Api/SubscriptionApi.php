@@ -7,8 +7,10 @@ namespace NexiCheckout\Api;
 use NexiCheckout\Api\Exception\ClientErrorPaymentApiException;
 use NexiCheckout\Api\Exception\InternalErrorPaymentApiException;
 use NexiCheckout\Api\Exception\PaymentApiException;
+use NexiCheckout\Http\Header\IdempotencyKey;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
+use NexiCheckout\Http\RequestHeaderOptions;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\ChargeSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
@@ -146,18 +148,13 @@ class SubscriptionApi
     public function chargeSubscription(string $subscriptionId, ChargeSubscription $chargeSubscription, ?string $idempotencyKey = null): SingleSubscriptionCharge
     {
         try {
-            $headers = [];
-            if ($idempotencyKey !== null) {
-                $headers['Idempotency-Key'] = $idempotencyKey;
-            }
-
             $response = $this->client->post(
                 \sprintf(
                     self::SUBSCRIPTION_CHARGES,
                     $subscriptionId
                 ),
                 json_encode($chargeSubscription),
-                $headers
+                $this->idempotencyOptions($idempotencyKey)
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
@@ -255,5 +252,14 @@ class SubscriptionApi
             $code >= 500 && $code < 600 => new PaymentApiException(\sprintf('Server error occurred: %s', $contents)),
             default => new PaymentApiException(\sprintf('Unexpected status code: %d', $code)),
         };
+    }
+
+    private function idempotencyOptions(?string $key): ?RequestHeaderOptions
+    {
+        if ($key === null) {
+            return null;
+        }
+
+        return RequestHeaderOptions::create()->with(new IdempotencyKey($key));
     }
 }

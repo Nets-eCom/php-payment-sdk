@@ -23,7 +23,7 @@ class PaymentApiFactory
         return new PaymentApi(
             $this->clientFactory->create(
                 $this->configurationProvider->provide($secretKey, $isLiveMode)
-            )
+            ),
         );
     }
 
@@ -34,7 +34,7 @@ class PaymentApiFactory
         return new SubscriptionApi(
             $this->clientFactory->create(
                 $this->configurationProvider->provide($secretKey, $isLiveMode)
-            )
+            ),
         );
     }
 }

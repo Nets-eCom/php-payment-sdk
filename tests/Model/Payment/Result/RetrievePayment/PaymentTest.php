@@ -47,12 +47,12 @@ final class PaymentTest extends TestCase
      */
     public static function summaryProvider(): iterable
     {
-        yield [new Summary(1, 0, 0, 0), PaymentStatusEnum::RESERVED, null];
-        yield [new Summary(2, 2, 0, 0), PaymentStatusEnum::CHARGED, null];
-        yield [new Summary(2, 1, 0, 0), PaymentStatusEnum::PARTIALLY_CHARGED, null];
-        yield [new Summary(2, 2, 2, 0), PaymentStatusEnum::REFUNDED, null];
-        yield [new Summary(2, 2, 1, 0), PaymentStatusEnum::PARTIALLY_REFUNDED, null];
-        yield [new Summary(2, 0, 0, 2), PaymentStatusEnum::CANCELLED, null];
-        yield [new Summary(0, 0, 0, 0), PaymentStatusEnum::TERMINATED, new \DateTimeImmutable()];
+        yield [new Summary(1, 0, 0, 0, 0, 0, 0, 0), PaymentStatusEnum::RESERVED, null];
+        yield [new Summary(2, 2, 0, 0, 0, 0, 0, 0), PaymentStatusEnum::CHARGED, null];
+        yield [new Summary(2, 1, 0, 0, 0, 0, 0, 0), PaymentStatusEnum::PARTIALLY_CHARGED, null];
+        yield [new Summary(2, 2, 2, 0, 0, 0, 0, 0), PaymentStatusEnum::REFUNDED, null];
+        yield [new Summary(2, 2, 1, 0, 0, 0, 0, 0), PaymentStatusEnum::PARTIALLY_REFUNDED, null];
+        yield [new Summary(2, 0, 0, 2, 0, 0, 0, 0), PaymentStatusEnum::CANCELLED, null];
+        yield [new Summary(0, 0, 0, 0, 0, 0, 0, 0), PaymentStatusEnum::TERMINATED, new \DateTimeImmutable()];
     }
 }

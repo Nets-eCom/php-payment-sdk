@@ -170,7 +170,11 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             $data['reservedAmount'] ?? 0,
             $data['chargedAmount'] ?? 0,
             $data['refundedAmount'] ?? 0,
-            $data['cancelledAmount'] ?? 0
+            $data['cancelledAmount'] ?? 0,
+            $data['reservedSurchargeAmount'] ?? 0,
+            $data['chargedSurchargeAmount'] ?? 0,
+            $data['refundedSurchargeAmount'] ?? 0,
+            $data['cancelledSurchargeAmount'] ?? 0,
         );
     }
 
@@ -214,7 +218,8 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             $data['amount'],
             RefundStateEnum::tryFrom($data['state']),
             new \DateTime($data['lastUpdated']),
-            self::createOrderItems($data['orderItems'])
+            self::createOrderItems($data['orderItems']),
+            $data['surchargeAmount'],
         );
     }
 
@@ -244,7 +249,8 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             $data['chargeId'],
             $data['amount'],
             new \DateTime($data['created']),
-            self::createOrderItems($data['orderItems'])
+            self::createOrderItems($data['orderItems']),
+            $data['surchargeAmount'],
         );
     }
 

@@ -14,7 +14,8 @@ class Refund
         private readonly int $amount,
         private readonly RefundStateEnum $refundState,
         private readonly \DateTimeInterface $lastUpdated,
-        private readonly array $orderItems
+        private readonly array $orderItems,
+        private readonly int $surchargeAmount,
     ) {
     }
 
@@ -44,5 +45,10 @@ class Refund
     public function getOrderItems(): array
     {
         return $this->orderItems;
+    }
+
+    public function getSurchargeAmount(): int
+    {
+        return $this->surchargeAmount;
     }
 }

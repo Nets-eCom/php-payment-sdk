@@ -10,7 +10,11 @@ class Summary
         private readonly int $reservedAmount,
         private readonly int $chargedAmount,
         private readonly int $refundedAmount,
-        private readonly int $cancelledAmount
+        private readonly int $cancelledAmount,
+        private readonly int $reservedSurchargeAmount,
+        private readonly int $chargedSurchargeAmount,
+        private readonly int $refundedSurchargeAmount,
+        private readonly int $cancelledSurchargeAmount,
     ) {
     }
 
@@ -32,5 +36,25 @@ class Summary
     public function getCancelledAmount(): int
     {
         return $this->cancelledAmount;
+    }
+
+    public function getReservedSurchargeAmount(): int
+    {
+        return $this->reservedSurchargeAmount;
+    }
+
+    public function getChargedSurchargeAmount(): int
+    {
+        return $this->chargedSurchargeAmount;
+    }
+
+    public function getRefundedSurchargeAmount(): int
+    {
+        return $this->refundedSurchargeAmount;
+    }
+
+    public function getCancelledSurchargeAmount(): int
+    {
+        return $this->cancelledSurchargeAmount;
     }
 }

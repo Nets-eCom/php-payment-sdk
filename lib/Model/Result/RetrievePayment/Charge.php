@@ -13,7 +13,8 @@ class Charge
         private readonly string $chargeId,
         private readonly int $amount,
         private readonly \DateTimeInterface $created,
-        private readonly array $orderItems
+        private readonly array $orderItems,
+        private readonly int $surchargeAmount,
     ) {
     }
 
@@ -38,5 +39,10 @@ class Charge
     public function getOrderItems(): array
     {
         return $this->orderItems;
+    }
+
+    public function getSurchargeAmount(): int
+    {
+        return $this->surchargeAmount;
     }
 }

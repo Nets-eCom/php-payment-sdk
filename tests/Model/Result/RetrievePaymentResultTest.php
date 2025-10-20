@@ -24,7 +24,8 @@ class RetrievePaymentResultTest extends TestCase
             "payment": {
                 "paymentId": "025400006091b1ef6937598058c4e487",
                 "summary": {
-                    "reservedAmount": 100
+                    "reservedAmount": 100,
+                    "reservedSurchargeAmount": 0
                 },
                 "consumer": {
                     "shippingAddress": {},

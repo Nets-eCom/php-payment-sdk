@@ -186,7 +186,7 @@ final class SubscriptionApiTest extends TestCase
 
         $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
 
-        $result = $sut->chargeSubscription('subscriptionId', $this->createChargeSubscriptionRequest(), null);
+        $result = $sut->chargeSubscription('subscriptionId', $this->createChargeSubscriptionRequest());
 
         $this->assertSame($paymentId, $result->getPaymentId());
         $this->assertSame($chargeId, $result->getChargeId());

@@ -27,7 +27,7 @@ final class PaymentTest extends TestCase
         $sut = new Payment(
             'foo',
             new OrderDetails(1, 'bar'),
-            new Checkout('baz', null),
+            new Checkout('baz'),
             new \DateTimeImmutable(),
             new Consumer(
                 $this->createStub(Address::class),

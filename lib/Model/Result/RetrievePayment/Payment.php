@@ -38,7 +38,7 @@ class Payment
     public function getSummary(): Summary
     {
         if (!$this->summary instanceof Summary) {
-            throw new \DomainException('Summary doesn\'t exist');
+            throw new \DomainException("Summary doesn't exist");
         }
 
         return $this->summary;

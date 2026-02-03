@@ -87,7 +87,7 @@ class PaymentApi
             $response = $this->client->get(\sprintf('%s/%s', self::PAYMENTS_ENDPOINT, $paymentId));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t retrieve payment for a given id: %s', $paymentId),
+                \sprintf("Couldn't retrieve payment for a given id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -112,7 +112,7 @@ class PaymentApi
             $response = $this->client->post($this->getPaymentOperationPath($paymentId, self::PAYMENT_CANCELS), json_encode($cancel));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t cancel for a given payment id: %s', $paymentId),
+                \sprintf("Couldn't cancel for a given payment id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -135,7 +135,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t update reference information for a given payment id: %s', $paymentId),
+                \sprintf("Couldn't update reference information for a given payment id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -162,7 +162,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t update myReference information for a given payment id: %s', $paymentId),
+                \sprintf("Couldn't update myReference information for a given payment id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -190,7 +190,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t update payment order for a given payment id: %s', $paymentId),
+                \sprintf("Couldn't update payment order for a given payment id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -215,7 +215,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t terminate payment id: %s', $paymentId),
+                \sprintf("Couldn't terminate payment id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -238,7 +238,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t create charge for a given payment id: %s', $paymentId),
+                \sprintf("Couldn't create charge for a given payment id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -267,7 +267,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t refund charge with id: %s', $chargeId),
+                \sprintf("Couldn't refund charge with id: %s", $chargeId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -297,7 +297,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t refund payment with id: %s', $paymentId),
+                \sprintf("Couldn't refund payment with id: %s", $paymentId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -331,7 +331,7 @@ class PaymentApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t cancel pending refund with id: %s', $refundId),
+                \sprintf("Couldn't cancel pending refund with id: %s", $refundId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -372,7 +372,7 @@ class PaymentApi
             $response = $this->client->get($path);
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                'Couldn\'t get payment methods',
+                "Couldn't get payment methods",
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -433,7 +433,7 @@ class PaymentApi
             $response = $this->client->post(self::PAYMENTS_ENDPOINT, json_encode($payment));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                'Couldn\'t create payment',
+                "Couldn't create payment",
                 $httpClientException->getCode(),
                 $httpClientException
             );

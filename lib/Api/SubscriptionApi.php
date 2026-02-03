@@ -71,7 +71,7 @@ class SubscriptionApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                'Couldn\'t bulk charge subscription',
+                "Couldn't bulk charge subscription",
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -103,7 +103,7 @@ class SubscriptionApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t retrieve subscription charges for bulk ID: %s', $bulkId),
+                \sprintf("Couldn't retrieve subscription charges for bulk ID: %s", $bulkId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -129,7 +129,7 @@ class SubscriptionApi
             $response = $this->client->post(self::SUBSCRIPTION_VERIFICATIONS, json_encode($verifySubscriptions));
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                'Couldn\'t verify subscriptions',
+                "Couldn't verify subscriptions",
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -158,7 +158,7 @@ class SubscriptionApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t retrieve charge for subscription with ID: %s', $subscriptionId),
+                \sprintf("Couldn't retrieve charge for subscription with ID: %s", $subscriptionId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -191,7 +191,7 @@ class SubscriptionApi
             );
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t retrieve verifications for bulk ID: %s', $bulkId),
+                \sprintf("Couldn't retrieve verifications for bulk ID: %s", $bulkId),
                 $httpClientException->getCode(),
                 $httpClientException
             );
@@ -217,7 +217,7 @@ class SubscriptionApi
             $response = $this->client->get($url);
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
-                \sprintf('Couldn\'t retrieve subscription for a given id: %s', $subscriptionId),
+                \sprintf("Couldn't retrieve subscription for a given id: %s", $subscriptionId),
                 $httpClientException->getCode(),
                 $httpClientException
             );

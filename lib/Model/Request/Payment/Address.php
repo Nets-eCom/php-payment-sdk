@@ -29,11 +29,13 @@ class Address implements \JsonSerializable
         $result = [
             'addressLine1' => $this->addressLine1,
             'addressLine2' => $this->addressLine2,
-            'postalCode' => $this->postalCode,
             'city' => $this->city,
             'country' => $this->country,
         ];
 
-        return array_filter($result);
+        $filtered = array_filter($result);
+        $filtered['postalCode'] = $this->postalCode;
+
+        return $filtered;
     }
 }

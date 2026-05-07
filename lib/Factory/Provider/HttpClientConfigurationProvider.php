@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace NexiCheckout\Factory\Provider;
 
 use NexiCheckout\Http\Configuration;
+use NexiCheckout\Http\UrlDictionary;
 
 final class HttpClientConfigurationProvider implements HttpClientConfigurationProviderInterface
 {
-    private const LIVE_URL = 'https://api.dibspayment.eu';
-
-    private const TEST_URL = 'https://test.api.dibspayment.eu';
-
     public function __construct(
-        private readonly string $liveUrl = self::LIVE_URL,
-        private readonly string $testUrl = self::TEST_URL,
+        private readonly string $liveUrl = UrlDictionary::LIVE_CHECKOUT_URL,
+        private readonly string $testUrl = UrlDictionary::TEST_CHECKOUT_URL,
         private ?string $commercePlatformTag = null
     ) {
     }

@@ -14,6 +14,7 @@ class Address
         private readonly ?string $receiverLine,
         private readonly ?string $postalCode,
         private readonly ?string $city,
+        private readonly ?string $country,
         private readonly ?PhoneNumber $phoneNumber = null
     ) {
     }
@@ -41,6 +42,11 @@ class Address
     public function getCity(): string
     {
         return $this->city;
+    }
+
+    public function getCountry(): string
+    {
+        return $this->country;
     }
 
     public function getPhoneNumber(): ?PhoneNumber

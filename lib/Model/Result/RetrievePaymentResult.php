@@ -114,6 +114,7 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             $data['receiverLine'] ?? null,
             $data['postalCode'] ?? null,
             $data['city'] ?? null,
+            $data['country'] ?? null,
             self::createPhoneNumber($data['phoneNumber'] ?? [])
         );
     }

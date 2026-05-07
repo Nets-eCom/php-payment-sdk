@@ -7,15 +7,10 @@ namespace NexiCheckout\Model\Request;
 final class PaymentMethods
 {
     public function __construct(
-        private readonly ?string $merchantNumber = null,
         private readonly ?string $currency = null,
-        private readonly ?bool $enabled = null
+        private readonly ?bool $enabled = null,
+        private readonly ?string $merchantNumber = null,
     ) {
-    }
-
-    public function getMerchantNumber(): ?string
-    {
-        return $this->merchantNumber;
     }
 
     public function getCurrency(): ?string
@@ -26,5 +21,10 @@ final class PaymentMethods
     public function getEnabled(): ?bool
     {
         return $this->enabled;
+    }
+
+    public function getMerchantNumber(): ?string
+    {
+        return $this->merchantNumber;
     }
 }

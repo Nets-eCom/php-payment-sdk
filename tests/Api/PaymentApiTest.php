@@ -448,7 +448,7 @@ final class PaymentApiTest extends TestCase
 
         $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
 
-        $result = $sut->getPaymentMethods(new PaymentMethods('123456', 'EUR', null));
+        $result = $sut->getPaymentMethods(new PaymentMethods('EUR', null, '123456'));
         $methods = $result->getMethods();
 
         $this->assertCount(2, $methods);

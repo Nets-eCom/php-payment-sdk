@@ -10,6 +10,9 @@ use NexiCheckout\Api\Exception\UnauthorizedApiException;
 use NexiCheckout\Api\PaymentApi;
 use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
+use NexiCheckout\Model\Request\CardPayment;
+use NexiCheckout\Model\Request\CardPayment\CardDetails;
+use NexiCheckout\Model\Request\CardPayment\PaymentInfo;
 use NexiCheckout\Model\Request\Charge;
 use NexiCheckout\Model\Request\FullCharge;
 use NexiCheckout\Model\Request\FullRefundCharge;
@@ -65,6 +68,59 @@ final class PaymentApiTest extends TestCase
         $result = $sut->createEmbeddedPayment($this->createPaymentRequest());
 
         $this->assertSame('1234', $result->getPaymentId());
+    }
+
+    public function testItCreatesCardPayment(): void
+    {
+        $response = $this->createResponse([
+            'paymentId' => 'card-payment-id-1234',
+            'idempotencyKey' => 'idempotency-key-1234',
+        ], 201);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->createCardPayment($this->createCardPaymentRequest());
+
+        $this->assertSame('card-payment-id-1234', $result->getPaymentId());
+        $this->assertSame('idempotency-key-1234', $result->getIdempotencyKey());
+    }
+
+    public function testItCreatesCardPaymentWithoutIdempotencyKey(): void
+    {
+        $response = $this->createResponse([
+            'paymentId' => 'card-payment-id-1234',
+        ], 201);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->createCardPayment($this->createCardPaymentRequest());
+
+        $this->assertSame('card-payment-id-1234', $result->getPaymentId());
+        $this->assertNull($result->getIdempotencyKey());
+    }
+
+    public function testItThrowsExceptionOnClientErrorCreateCardPayment(): void
+    {
+        $this->expectException(ClientErrorPaymentApiException::class);
+
+        $response = $this->createResponse([
+            'errors' => [
+                'property1' => ['string'],
+            ],
+        ], 400);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+        $sut->createCardPayment($this->createCardPaymentRequest());
+    }
+
+    public function testItThrowsExceptionOnUnsuccessfulCreateCardPayment(): void
+    {
+        $this->expectException(PaymentApiException::class);
+
+        $response = $this->createResponse([], 500);
+
+        $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
+        $sut->createCardPayment($this->createCardPaymentRequest());
     }
 
     public function testItThrowsExceptionOnPsrClientExceptionCreatePayment(): void
@@ -545,6 +601,21 @@ final class PaymentApiTest extends TestCase
             [
                 new MethodConfiguration('foo', true),
             ]
+        );
+    }
+
+    private function createCardPaymentRequest(): CardPayment
+    {
+        return new CardPayment(
+            new Order(
+                [
+                    new Item('item', 1, 'pcs', 100, 100, 100, 'ref'),
+                ],
+                'SEK',
+                100
+            ),
+            new PaymentInfo(true),
+            new CardDetails('4111111111111111', '12', '25', '123'),
         );
     }
 

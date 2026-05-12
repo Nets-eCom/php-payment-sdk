@@ -13,6 +13,7 @@ use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Http\RequestHeaderOptions;
 use NexiCheckout\Model\Request\Cancel;
+use NexiCheckout\Model\Request\CardPayment;
 use NexiCheckout\Model\Request\Charge;
 use NexiCheckout\Model\Request\MyReference;
 use NexiCheckout\Model\Request\Payment;
@@ -21,6 +22,7 @@ use NexiCheckout\Model\Request\ReferenceInformation;
 use NexiCheckout\Model\Request\RefundCharge;
 use NexiCheckout\Model\Request\RefundPayment;
 use NexiCheckout\Model\Request\UpdateOrder;
+use NexiCheckout\Model\Result\CardPaymentResult;
 use NexiCheckout\Model\Result\ChargeResult;
 use NexiCheckout\Model\Result\Payment\PaymentWithEmbeddedCheckoutResult;
 use NexiCheckout\Model\Result\Payment\PaymentWithHostedCheckoutResult;
@@ -32,6 +34,8 @@ use NexiCheckout\Model\Result\RetrievePaymentResult;
 class PaymentApi
 {
     private const PAYMENTS_ENDPOINT = '/v1/payments';
+
+    private const CARD_PAYMENTS_ENDPOINT = '/v1/cardpayments';
 
     private const PAYMENT_CHARGES = '/charges';
 
@@ -76,6 +80,36 @@ class PaymentApi
     public function createEmbeddedPayment(Payment $payment): PaymentWithEmbeddedCheckoutResult
     {
         return PaymentWithEmbeddedCheckoutResult::fromJson($this->createPaymentContent($payment));
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function createCardPayment(CardPayment $cardPayment, ?string $idempotencyKey = null): CardPaymentResult
+    {
+        try {
+            $response = $this->client->post(
+                self::CARD_PAYMENTS_ENDPOINT,
+                json_encode($cardPayment),
+                $this->idempotencyOptions($idempotencyKey)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                "Couldn't create card payment",
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return CardPaymentResult::fromJson($contents);
     }
 
     /**

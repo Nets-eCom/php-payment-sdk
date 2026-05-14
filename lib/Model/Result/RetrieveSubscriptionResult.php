@@ -100,7 +100,7 @@ class RetrieveSubscriptionResult implements JsonDeserializeInterface
         return new PaymentDetails(
             PaymentTypeEnum::tryFrom($data['paymentType']),
             $data['paymentMethod'],
-            new CardDetails(...$data['cardDetails']),
+            CardDetails::fromArray($data['cardDetails']),
         );
     }
 }

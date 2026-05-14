@@ -10,6 +10,17 @@ class CardDetails
     {
     }
 
+    /**
+     * @param array{maskedPan?: string, expiryDate?: string} $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['maskedPan'] ?? null,
+            $data['expiryDate'] ?? null,
+        );
+    }
+
     public function getMaskedPan(): ?string
     {
         return $this->maskedPan;

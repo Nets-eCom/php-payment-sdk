@@ -18,6 +18,7 @@ use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
+use NexiCheckout\Model\Result\RetrieveUnscheduledSubscriptionResult;
 use NexiCheckout\Model\Result\SubscriptionCharges\SingleSubscriptionCharge;
 use NexiCheckout\Model\Result\VerifySubscriptionsResult;
 
@@ -30,6 +31,8 @@ class SubscriptionApi
     private const SUBSCRIPTION_VERIFICATIONS = self::SUBSCRIPTIONS_ENDPOINT . '/verifications';
 
     private const SUBSCRIPTION_CHARGES = self::SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
+
+    private const UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT = '/v1/unscheduledsubscriptions';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -60,6 +63,34 @@ class SubscriptionApi
             \sprintf('%s/%s?externalReference=%s', self::SUBSCRIPTIONS_ENDPOINT, $subscriptionId, $externalReference),
             $subscriptionId
         );
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveUnscheduledSubscription(string $unscheduledSubscriptionId): RetrieveUnscheduledSubscriptionResult
+    {
+        try {
+            $response = $this->client->get(
+                \sprintf('%s/%s', self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT, $unscheduledSubscriptionId)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf("Couldn't retrieve unscheduled subscription for a given id: %s", $unscheduledSubscriptionId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveUnscheduledSubscriptionResult::fromJson($contents);
     }
 
     public function bulkChargeSubscription(BulkChargeSubscription $bulkChargeSubscription): BulkChargeSubscriptionResult

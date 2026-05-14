@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NexiCheckout\Tests\Api;
 
+use NexiCheckout\Api\Exception\ClientErrorPaymentApiException;
+use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Api\SubscriptionApi;
 use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
@@ -80,6 +82,81 @@ final class SubscriptionApiTest extends TestCase
         $result = $sut->retrieveSubscriptionByExternalReference($subscriptionId, 'ref');
 
         $this->assertSame($subscriptionId, $result->getSubscriptionId());
+    }
+
+    public function testItRetrievesUnscheduledSubscription(): void
+    {
+        $unscheduledSubscriptionId = 'abc-123';
+        $response = $this->createResponse(
+            [
+                'unscheduledSubscriptionId' => $unscheduledSubscriptionId,
+                'paymentDetails' => [
+                    'paymentType' => 'CARD',
+                    'paymentMethod' => 'Visa',
+                    'cardDetails' => [
+                        'expiryDate' => 'foo',
+                        'maskedPan' => 'bar',
+                    ],
+                ],
+            ],
+            200
+        );
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveUnscheduledSubscription($unscheduledSubscriptionId);
+
+        $this->assertSame($unscheduledSubscriptionId, $result->getUnscheduledSubscriptionId());
+    }
+
+    public function testItRetrievesUnscheduledSubscriptionWithUnknownCardDetailsKeys(): void
+    {
+        $unscheduledSubscriptionId = 'abc-123';
+        $response = $this->createResponse(
+            [
+                'unscheduledSubscriptionId' => $unscheduledSubscriptionId,
+                'paymentDetails' => [
+                    'paymentType' => 'CARD',
+                    'paymentMethod' => 'Visa',
+                    'cardDetails' => [
+                        'expiryDate' => 'foo',
+                        'maskedPan' => 'bar',
+                        'cardBrand' => 'Visa',
+                    ],
+                ],
+            ],
+            200
+        );
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveUnscheduledSubscription($unscheduledSubscriptionId);
+
+        $this->assertSame($unscheduledSubscriptionId, $result->getUnscheduledSubscriptionId());
+    }
+
+    public function testItThrowsExceptionOnClientErrorRetrieveUnscheduledSubscription(): void
+    {
+        $this->expectException(ClientErrorPaymentApiException::class);
+
+        $response = $this->createResponse([
+            'errors' => [
+                'property1' => ['string'],
+            ],
+        ], 400);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+        $sut->retrieveUnscheduledSubscription('abc-123');
+    }
+
+    public function testItThrowsExceptionOnServerErrorRetrieveUnscheduledSubscription(): void
+    {
+        $this->expectException(PaymentApiException::class);
+
+        $response = $this->createResponse([], 500);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStub(StreamFactoryInterface::class));
+        $sut->retrieveUnscheduledSubscription('abc-123');
     }
 
     public function testItBulkChargesSubscription(): void

@@ -9,8 +9,10 @@ use NexiCheckout\Api\Exception\PaymentApiException;
 use NexiCheckout\Api\SubscriptionApi;
 use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
+use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\ChargeSubscription;
+use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\Item;
 use NexiCheckout\Model\Request\Shared\Notification;
 use NexiCheckout\Model\Request\Shared\Notification\Webhook;
@@ -269,6 +271,39 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame($chargeId, $result->getChargeId());
     }
 
+    public function testItChargesUnscheduledSubscription(): void
+    {
+        $paymentId = '472e651e-5a1e-424d-8098-23858bf03ad7';
+        $chargeId = 'aec0aceb-a4db-49fb-b366-75e90229c640';
+
+        $response = $this->createResponse([
+            'paymentId' => $paymentId,
+            'chargeId' => $chargeId,
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->chargeUnscheduledSubscription('subscriptionId', $this->createChargeUnscheduledSubscriptionRequest());
+
+        $this->assertSame($paymentId, $result->getPaymentId());
+        $this->assertSame($chargeId, $result->getChargeId());
+    }
+
+    public function testItThrowsExceptionWhenChargingUnscheduledSubscriptionRequestFails(): void
+    {
+        $subscriptionId = 'subscriptionId';
+        $httpClientException = new HttpClientException('Request failed', 503);
+
+        $httpClient = $this->createMock(HttpClient::class);
+        $httpClient->expects($this->once())
+            ->method('post')
+            ->willThrowException($httpClientException);
+
+        $sut = new SubscriptionApi($httpClient);
+        $this->expectException(PaymentApiException::class);
+        $sut->chargeUnscheduledSubscription($subscriptionId, $this->createChargeUnscheduledSubscriptionRequest());
+    }
+
     /**
      * @param array<string, mixed> $data
      */
@@ -312,6 +347,28 @@ final class SubscriptionApiTest extends TestCase
     private function createChargeSubscriptionRequest(): ChargeSubscription
     {
         return new ChargeSubscription(
+            new Order(
+                [
+                    new Item(
+                        'item',
+                        1,
+                        'pcs',
+                        100,
+                        100,
+                        100,
+                        'ref'
+                    ),
+                ],
+                'SEK',
+                100
+            ),
+            new Notification([new Webhook('foo', 'bar', 'baz')]),
+        );
+    }
+
+    private function createChargeUnscheduledSubscriptionRequest(): ChargeUnscheduledSubscription
+    {
+        return new ChargeUnscheduledSubscription(
             new Order(
                 [
                     new Item(

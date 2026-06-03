@@ -13,6 +13,7 @@ use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Http\RequestHeaderOptions;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\ChargeSubscription;
+use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
@@ -20,6 +21,7 @@ use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveUnscheduledSubscriptionResult;
 use NexiCheckout\Model\Result\SubscriptionCharges\SingleSubscriptionCharge;
+use NexiCheckout\Model\Result\SubscriptionCharges\UnscheduledSubscriptionCharge;
 use NexiCheckout\Model\Result\VerifySubscriptionsResult;
 
 class SubscriptionApi
@@ -33,6 +35,8 @@ class SubscriptionApi
     private const SUBSCRIPTION_CHARGES = self::SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
 
     private const UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT = '/v1/unscheduledsubscriptions';
+
+    private const UNSCHEDULED_SUBSCRIPTION_CHARGES = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -203,6 +207,39 @@ class SubscriptionApi
         }
 
         return SingleSubscriptionCharge::fromJson($contents);
+
+    }
+
+    public function chargeUnscheduledSubscription(
+        string $subscriptionId,
+        ChargeUnscheduledSubscription $chargeSubscription,
+        ?string $idempotencyKey = null
+    ): UnscheduledSubscriptionCharge {
+        try {
+            $response = $this->client->post(
+                \sprintf(
+                    self::UNSCHEDULED_SUBSCRIPTION_CHARGES,
+                    $subscriptionId
+                ),
+                json_encode($chargeSubscription),
+                $this->idempotencyOptions($idempotencyKey)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf("Couldn't retrieve charge for unscheduled subscription with ID: %s", $subscriptionId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return UnscheduledSubscriptionCharge::fromJson($contents);
 
     }
 

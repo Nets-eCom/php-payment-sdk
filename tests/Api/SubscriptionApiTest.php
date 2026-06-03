@@ -11,6 +11,8 @@ use NexiCheckout\Http\Configuration;
 use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
+use NexiCheckout\Model\Request\BulkChargeUnscheduledSubscription;
+use NexiCheckout\Model\Request\BulkChargeUnscheduledSubscription\UnscheduledSubscription as BulkUnscheduledSubscription;
 use NexiCheckout\Model\Request\ChargeSubscription;
 use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\Item;
@@ -232,6 +234,21 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
     }
 
+    public function testItBulkChargesUnscheduledSubscriptions(): void
+    {
+        $bulkId = '878a443c-e535-48b3-aa7a-2853592c3ce8';
+
+        $response = $this->createResponse([
+            'bulkId' => $bulkId,
+        ], 202);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->bulkChargeUnscheduledSubscriptions($this->createBulkChargeUnscheduledSubscriptionRequest());
+
+        $this->assertSame($bulkId, $result->getBulkId());
+    }
+
     public function testItRetrievesBulkVerifications(): void
     {
         $subscriptionId = 'foo';
@@ -443,6 +460,17 @@ final class SubscriptionApiTest extends TestCase
                 ],
             ],
         ];
+        yield [
+            ClientErrorPaymentApiException::class,
+            'bulkChargeUnscheduledSubscriptions',
+            [new BulkChargeUnscheduledSubscription([])],
+            400,
+            [
+                'errors' => [
+                    'property1' => ['string'],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -543,6 +571,35 @@ final class SubscriptionApiTest extends TestCase
             'foo',
             new Notification([new Webhook('foo', 'bar', 'baz')]),
             []
+        );
+    }
+
+    private function createBulkChargeUnscheduledSubscriptionRequest(): BulkChargeUnscheduledSubscription
+    {
+        return new BulkChargeUnscheduledSubscription(
+            [
+                new BulkUnscheduledSubscription(
+                    new Order(
+                        [
+                            new Item(
+                                'item',
+                                1,
+                                'pcs',
+                                100,
+                                100,
+                                100,
+                                'ref'
+                            ),
+                        ],
+                        'SEK',
+                        100
+                    ),
+                    unscheduledSubscriptionId: '92143051-9e78-40af-a01f-245ccdcd9c03',
+                    myReference: 'my-reference'
+                ),
+            ],
+            'foo',
+            new Notification([new Webhook('foo', 'bar', 'baz')]),
         );
     }
 

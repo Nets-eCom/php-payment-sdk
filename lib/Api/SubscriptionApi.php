@@ -12,6 +12,7 @@ use NexiCheckout\Http\HttpClient;
 use NexiCheckout\Http\HttpClientException;
 use NexiCheckout\Http\RequestHeaderOptions;
 use NexiCheckout\Model\Request\BulkChargeSubscription;
+use NexiCheckout\Model\Request\BulkChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\ChargeSubscription;
 use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
@@ -39,6 +40,8 @@ class SubscriptionApi
     private const SUBSCRIPTION_CHARGES = self::SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
 
     private const UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT = '/v1/unscheduledsubscriptions';
+
+    private const UNSCHEDULED_SUBSCRIPTION_CHARGES_BULK = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/charges';
 
     private const UNSCHEDULED_SUBSCRIPTION_CHARGES = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
 
@@ -176,6 +179,36 @@ class SubscriptionApi
         } catch (HttpClientException $httpClientException) {
             throw new PaymentApiException(
                 "Couldn't bulk charge subscription",
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return BulkChargeSubscriptionResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function bulkChargeUnscheduledSubscriptions(
+        BulkChargeUnscheduledSubscription $bulkChargeUnscheduledSubscription
+    ): BulkChargeSubscriptionResult {
+        try {
+            $response = $this->client->post(
+                self::UNSCHEDULED_SUBSCRIPTION_CHARGES_BULK,
+                json_encode($bulkChargeUnscheduledSubscription)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                "Couldn't bulk charge unscheduled subscriptions",
                 $httpClientException->getCode(),
                 $httpClientException
             );

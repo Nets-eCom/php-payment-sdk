@@ -15,6 +15,7 @@ use NexiCheckout\Model\Request\BulkChargeSubscription;
 use NexiCheckout\Model\Request\ChargeSubscription;
 use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
+use NexiCheckout\Model\Request\VerifyUnscheduledSubscriptions;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
 use NexiCheckout\Model\Result\RetrieveBulkUnscheduledVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
@@ -25,6 +26,7 @@ use NexiCheckout\Model\Result\RetrieveUnscheduledSubscriptionResult;
 use NexiCheckout\Model\Result\SubscriptionCharges\SingleSubscriptionCharge;
 use NexiCheckout\Model\Result\SubscriptionCharges\UnscheduledSubscriptionCharge;
 use NexiCheckout\Model\Result\VerifySubscriptionsResult;
+use NexiCheckout\Model\Result\VerifyUnscheduledSubscriptionsResult;
 
 class SubscriptionApi
 {
@@ -39,6 +41,8 @@ class SubscriptionApi
     private const UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT = '/v1/unscheduledsubscriptions';
 
     private const UNSCHEDULED_SUBSCRIPTION_CHARGES = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
+
+    private const UNSCHEDULED_SUBSCRIPTIONS_VERIFICATIONS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/verifications';
 
     private const UNSCHEDULED_SUBSCRIPTION_VERIFICATIONS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/verifications/%s';
 
@@ -381,6 +385,35 @@ class SubscriptionApi
         }
 
         return RetrieveBulkUnscheduledVerificationsResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function verifyUnscheduledSubscriptions(VerifyUnscheduledSubscriptions $verifyUnscheduledSubscriptions): VerifyUnscheduledSubscriptionsResult
+    {
+        try {
+            $response = $this->client->post(
+                self::UNSCHEDULED_SUBSCRIPTIONS_VERIFICATIONS,
+                json_encode($verifyUnscheduledSubscriptions)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                "Couldn't verify unscheduled subscriptions",
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return VerifyUnscheduledSubscriptionsResult::fromJson($contents);
     }
 
     /**

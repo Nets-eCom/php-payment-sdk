@@ -19,9 +19,12 @@ use NexiCheckout\Model\Request\Shared\Notification\Webhook;
 use NexiCheckout\Model\Request\Shared\Order;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Request\VerifySubscriptions\Subscription;
+use NexiCheckout\Model\Request\VerifyUnscheduledSubscriptions;
+use NexiCheckout\Model\Request\VerifyUnscheduledSubscriptions\UnscheduledSubscription;
 use NexiCheckout\Model\Result\Shared\BulkOperationStatusEnum;
 use NexiCheckout\Model\Result\Shared\VerificationStatusEnum;
 use NexiCheckout\Model\Result\SubscriptionCharges\ChargeStatusEnum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -186,30 +189,6 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame($unscheduledSubscriptionId, $result->getUnscheduledSubscriptionId());
     }
 
-    public function testItThrowsExceptionOnClientErrorRetrieveUnscheduledSubscription(): void
-    {
-        $this->expectException(ClientErrorPaymentApiException::class);
-
-        $response = $this->createResponse([
-            'errors' => [
-                'property1' => ['string'],
-            ],
-        ], 400);
-
-        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
-        $sut->retrieveUnscheduledSubscription('abc-123');
-    }
-
-    public function testItThrowsExceptionOnServerErrorRetrieveUnscheduledSubscription(): void
-    {
-        $this->expectException(PaymentApiException::class);
-
-        $response = $this->createResponse([], 500);
-
-        $sut = $this->createSubscriptionApi($response, $this->createStub(StreamFactoryInterface::class));
-        $sut->retrieveUnscheduledSubscription('abc-123');
-    }
-
     public function testItBulkChargesSubscription(): void
     {
         $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
@@ -328,30 +307,6 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame(BulkOperationStatusEnum::PROCESSING, $result->getBulkOperationStatus());
     }
 
-    public function testItThrowsExceptionOnClientErrorRetrieveBulkVerificationsForUnscheduledSubscriptions(): void
-    {
-        $this->expectException(ClientErrorPaymentApiException::class);
-
-        $response = $this->createResponse([
-            'errors' => [
-                'property1' => ['string'],
-            ],
-        ], 400);
-
-        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
-        $sut->retrieveBulkVerificationsForUnscheduledSubscriptions('bulk-id');
-    }
-
-    public function testItThrowsExceptionOnServerErrorRetrieveBulkVerificationsForUnscheduledSubscriptions(): void
-    {
-        $this->expectException(PaymentApiException::class);
-
-        $response = $this->createResponse([], 500);
-
-        $sut = $this->createSubscriptionApi($response, $this->createStub(StreamFactoryInterface::class));
-        $sut->retrieveBulkVerificationsForUnscheduledSubscriptions('bulk-id');
-    }
-
     public function testItVerifySubscriptions(): void
     {
         $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
@@ -366,6 +321,27 @@ final class SubscriptionApiTest extends TestCase
             [
                 new Subscription('foo'),
                 new Subscription(externalReference: 'bar'),
+            ],
+            $bulkId
+        ));
+
+        $this->assertSame($bulkId, $result->getBulkId());
+    }
+
+    public function testItVerifyUnscheduledSubscriptions(): void
+    {
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'bulkId' => $bulkId,
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->verifyUnscheduledSubscriptions(new VerifyUnscheduledSubscriptions(
+            [
+                new UnscheduledSubscription('abc-123'),
+                new UnscheduledSubscription(externalReference: 'ext-ref'),
             ],
             $bulkId
         ));
@@ -409,19 +385,91 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame($chargeId, $result->getChargeId());
     }
 
-    public function testItThrowsExceptionWhenChargingUnscheduledSubscriptionRequestFails(): void
-    {
-        $subscriptionId = 'subscriptionId';
-        $httpClientException = new HttpClientException('Request failed', 503);
+    /**
+     * @param mixed[] $arguments
+     * @param mixed[] $resposeBody
+     */
+    #[DataProvider('methodsClientError')]
+    public function testItThrowsExceptionOnClientError(
+        string $expectedException,
+        string $methodName,
+        array $arguments,
+        int $errorCode,
+        ?array $resposeBody
+    ): void {
+        $this->expectException($expectedException);
 
+        $response = $this->createResponse($resposeBody, $errorCode);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+        $sut->{$methodName}(...$arguments);
+    }
+
+    /**
+     * @return iterable<array{string, string, mixed[], int, ?mixed[]}>
+     */
+    public static function methodsClientError(): iterable
+    {
+        yield [
+            ClientErrorPaymentApiException::class, 'retrieveUnscheduledSubscription', ['abc-123'], 400, [
+                'errors' => [
+                    'property1' => ['string'],
+                ],
+            ]];
+        yield [
+            PaymentApiException::class, 'retrieveUnscheduledSubscription', ['abc-123'], 500, [
+                'message' => 'Internal Server Error',
+                'code' => 1000,
+            ]];
+        yield [
+            ClientErrorPaymentApiException::class,
+            'retrieveBulkVerificationsForUnscheduledSubscriptions',
+            ['bulk-id'],
+            400,
+            [
+                'errors' => [
+                    'property1' => ['string'],
+                ],
+            ],
+        ];
+        yield [
+            ClientErrorPaymentApiException::class,
+            'verifyUnscheduledSubscriptions',
+            [new VerifyUnscheduledSubscriptions([], 'bulk-id')],
+            400,
+            [
+                'errors' => [
+                    'property1' => ['string'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param mixed[] $arguments
+     */
+    #[DataProvider('methodsServerError')]
+    public function testMethodsThrowsExceptionOnServerError(string $methodName, array $arguments, string $httpMethod, int $errorCode): void
+    {
         $httpClient = $this->createMock(HttpClient::class);
         $httpClient->expects($this->once())
-            ->method('post')
-            ->willThrowException($httpClientException);
+            ->method($httpMethod)
+            ->willThrowException(new HttpClientException('Request failed', $errorCode));
 
         $sut = new SubscriptionApi($httpClient);
         $this->expectException(PaymentApiException::class);
-        $sut->chargeUnscheduledSubscription($subscriptionId, $this->createChargeUnscheduledSubscriptionRequest());
+        $sut->{$methodName}(...$arguments);
+    }
+
+    /**
+     * @return iterable<array{string, mixed[], string, int}>
+     */
+    public static function methodsServerError(): iterable
+    {
+        yield ['retrieveUnscheduledSubscription', ['abc-123'], 'get', 500];
+        yield ['retrieveBulkVerificationsForUnscheduledSubscriptions', ['bulk-id'], 'get', 500];
+        yield ['chargeUnscheduledSubscription', ['subscriptionId', new ChargeUnscheduledSubscription(new Order([], 'SEK', 1), null)], 'post', 503];
+        yield ['verifyUnscheduledSubscriptions', [new VerifyUnscheduledSubscriptions([], 'bulk-id')], 'post', 500];
     }
 
     public function testItRetrievesStatusOfUnscheduledSubscription(): void

@@ -20,6 +20,7 @@ use NexiCheckout\Model\Result\RetrieveBulkUnscheduledVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
+use NexiCheckout\Model\Result\RetrieveUnscheduledSubscriptionChargeStatus;
 use NexiCheckout\Model\Result\RetrieveUnscheduledSubscriptionResult;
 use NexiCheckout\Model\Result\SubscriptionCharges\SingleSubscriptionCharge;
 use NexiCheckout\Model\Result\SubscriptionCharges\UnscheduledSubscriptionCharge;
@@ -40,6 +41,8 @@ class SubscriptionApi
     private const UNSCHEDULED_SUBSCRIPTION_CHARGES = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
 
     private const UNSCHEDULED_SUBSCRIPTION_VERIFICATIONS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/verifications/%s';
+
+    private const UNSCHEDULED_SUBSCRIPTION_CHARGE_STATUS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charge/status';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -126,6 +129,37 @@ class SubscriptionApi
         }
 
         return RetrieveUnscheduledSubscriptionResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveUnscheduledSubscriptionChargeStatus(
+        string $unscheduledSubscriptionId,
+        ?string $idempotencyKey = null
+    ): RetrieveUnscheduledSubscriptionChargeStatus {
+        try {
+            $response = $this->client->get(
+                \sprintf(self::UNSCHEDULED_SUBSCRIPTION_CHARGE_STATUS, $unscheduledSubscriptionId),
+                $this->idempotencyOptions($idempotencyKey)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf("Couldn't retrieve unscheduled subscription charge status for a given id: %s", $unscheduledSubscriptionId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveUnscheduledSubscriptionChargeStatus::fromJson($contents);
     }
 
     public function bulkChargeSubscription(BulkChargeSubscription $bulkChargeSubscription): BulkChargeSubscriptionResult

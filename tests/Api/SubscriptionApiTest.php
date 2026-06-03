@@ -424,6 +424,40 @@ final class SubscriptionApiTest extends TestCase
         $sut->chargeUnscheduledSubscription($subscriptionId, $this->createChargeUnscheduledSubscriptionRequest());
     }
 
+    public function testItRetrievesStatusOfUnscheduledSubscription(): void
+    {
+        $paymentId = '472e651e-5a1e-424d-8098-23858bf03ad7';
+        $chargeId = 'aec0aceb-a4db-49fb-b366-75e90229c640';
+        $subscriptionId = 'subscriptionId';
+
+        $response = $this->createResponse([
+            'paymentId' => $paymentId,
+            'chargeId' => $chargeId,
+            'completed' => true,
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveUnscheduledSubscriptionChargeStatus($subscriptionId);
+
+        $this->assertSame($paymentId, $result->getPaymentId());
+        $this->assertSame($chargeId, $result->getChargeId());
+        $this->assertTrue($result->getCompleted());
+    }
+
+    public function testItThrowsExceptionWhenCheckingUnscheduledSubscriptionStatusFails(): void
+    {
+        $subscriptionId = 'subscriptionId';
+        $idempotencyKey = 'idempotencyKey';
+
+        $this->expectException(PaymentApiException::class);
+
+        $response = $this->createResponse([], 404);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStub(StreamFactoryInterface::class));
+        $sut->retrieveUnscheduledSubscriptionChargeStatus($subscriptionId, $idempotencyKey);
+    }
+
     /**
      * @param array<string, mixed> $data
      */

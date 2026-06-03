@@ -18,6 +18,7 @@ use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Request\VerifyUnscheduledSubscriptions;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
+use NexiCheckout\Model\Result\RetrieveBulkUnscheduledChargesResult;
 use NexiCheckout\Model\Result\RetrieveBulkUnscheduledVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
@@ -254,6 +255,49 @@ class SubscriptionApi
         }
 
         return RetrieveSubscriptionBulkChargesResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveBulkUnscheduledCharges(
+        string $bulkId,
+        ?int $skip = null,
+        ?int $take = null,
+        ?int $pageNumber = null,
+        ?int $pageSize = null,
+    ): RetrieveBulkUnscheduledChargesResult {
+        $url = \sprintf('%s/%s', self::UNSCHEDULED_SUBSCRIPTION_CHARGES_BULK, $bulkId);
+        $queryParams = \array_filter([
+            'skip' => $skip,
+            'take' => $take,
+            'pageNumber' => $pageNumber,
+            'pageSize' => $pageSize,
+        ]);
+
+        if ($queryParams !== []) {
+            $url .= '?' . \http_build_query($queryParams);
+        }
+
+        try {
+            $response = $this->client->get($url);
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf("Couldn't retrieve bulk unscheduled charges for bulk ID: %s", $bulkId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveBulkUnscheduledChargesResult::fromJson($contents);
     }
 
     /**

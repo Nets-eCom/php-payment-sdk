@@ -324,6 +324,54 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame(BulkOperationStatusEnum::PROCESSING, $result->getBulkOperationStatus());
     }
 
+    public function testItRetrievesBulkUnscheduledCharges(): void
+    {
+        $unscheduledSubscriptionId = '6a3e3ab66c374d50b779a3d0b8447f92';
+        $bulkId = '384760c02faf45a69376a3edff6c8415';
+
+        $response = $this->createResponse([
+            'page' => [
+                [
+                    'unscheduledSubscriptionId' => $unscheduledSubscriptionId,
+                    'paymentId' => '472e651e-5a1e-424d-8098-23858bf03ad7',
+                    'chargeId' => 'aec0aceb-a4db-49fb-b366-75e90229c640',
+                    'status' => 'Succeeded',
+                    'externalReference' => 'ref-123',
+                ],
+            ],
+            'more' => false,
+            'status' => 'Done',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveBulkUnscheduledCharges($bulkId);
+
+        $this->assertSame($unscheduledSubscriptionId, $result->getPage()[0]->getUnscheduledSubscriptionId());
+        $this->assertSame(ChargeStatusEnum::SUCCEEDED, $result->getPage()[0]->getStatus());
+        $this->assertSame('ref-123', $result->getPage()[0]->getExternalReference());
+        $this->assertFalse($result->isMore());
+        $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
+    }
+
+    public function testItRetrievesBulkUnscheduledChargesWithPagination(): void
+    {
+        $bulkId = '384760c02faf45a69376a3edff6c8415';
+
+        $response = $this->createResponse([
+            'page' => [],
+            'more' => true,
+            'status' => 'Processing',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveBulkUnscheduledCharges($bulkId, skip: 10, take: 5);
+
+        $this->assertTrue($result->isMore());
+        $this->assertSame(BulkOperationStatusEnum::PROCESSING, $result->getBulkOperationStatus());
+    }
+
     public function testItVerifySubscriptions(): void
     {
         $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
@@ -462,6 +510,27 @@ final class SubscriptionApiTest extends TestCase
         ];
         yield [
             ClientErrorPaymentApiException::class,
+            'retrieveBulkUnscheduledCharges',
+            ['384760c02faf45a69376a3edff6c8415'],
+            400,
+            [
+                'errors' => [
+                    'property1' => ['string'],
+                ],
+            ],
+        ];
+        yield [
+            PaymentApiException::class,
+            'retrieveBulkUnscheduledCharges',
+            ['384760c02faf45a69376a3edff6c8415'],
+            500,
+            [
+                'message' => 'Internal Server Error',
+                'code' => 1000,
+            ],
+        ];
+        yield [
+            ClientErrorPaymentApiException::class,
             'bulkChargeUnscheduledSubscriptions',
             [new BulkChargeUnscheduledSubscription([])],
             400,
@@ -494,10 +563,11 @@ final class SubscriptionApiTest extends TestCase
      */
     public static function methodsServerError(): iterable
     {
-        yield ['retrieveUnscheduledSubscription', ['abc-123'], 'get', 500];
-        yield ['retrieveBulkVerificationsForUnscheduledSubscriptions', ['bulk-id'], 'get', 500];
+        yield ['retrieveUnscheduledSubscription', ['abc-123'], 'get', 504];
+        yield ['retrieveBulkVerificationsForUnscheduledSubscriptions', ['bulk-id'], 'get', 504];
         yield ['chargeUnscheduledSubscription', ['subscriptionId', new ChargeUnscheduledSubscription(new Order([], 'SEK', 1), null)], 'post', 503];
-        yield ['verifyUnscheduledSubscriptions', [new VerifyUnscheduledSubscriptions([], 'bulk-id')], 'post', 500];
+        yield ['verifyUnscheduledSubscriptions', [new VerifyUnscheduledSubscriptions([], 'bulk-id')], 'post', 504];
+        yield ['retrieveBulkUnscheduledCharges', ['384760c02faf45a69376a3edff6c8415'], 'get', 504];
     }
 
     public function testItRetrievesStatusOfUnscheduledSubscription(): void

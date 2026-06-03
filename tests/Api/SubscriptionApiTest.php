@@ -86,6 +86,55 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame($subscriptionId, $result->getSubscriptionId());
     }
 
+    public function testItRetrievesUnscheduledSubscriptionByExternalReference(): void
+    {
+        $unscheduledSubscriptionId = 'abc-123';
+        $response = $this->createResponse(
+            [
+                'unscheduledSubscriptionId' => $unscheduledSubscriptionId,
+                'paymentDetails' => [
+                    'paymentType' => 'CARD',
+                    'paymentMethod' => 'Visa',
+                    'cardDetails' => [
+                        'expiryDate' => 'foo',
+                        'maskedPan' => 'bar',
+                    ],
+                ],
+            ],
+            200
+        );
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveUnscheduledSubscriptionByExternalReference('ext-ref-123');
+
+        $this->assertSame($unscheduledSubscriptionId, $result->getUnscheduledSubscriptionId());
+    }
+
+    public function testItThrowsExceptionOnClientErrorRetrieveUnscheduledSubscriptionByExternalReference(): void
+    {
+        $this->expectException(ClientErrorPaymentApiException::class);
+
+        $response = $this->createResponse([
+            'errors' => [
+                'property1' => ['string'],
+            ],
+        ], 400);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+        $sut->retrieveUnscheduledSubscriptionByExternalReference('ext-ref-123');
+    }
+
+    public function testItThrowsExceptionOnServerErrorRetrieveUnscheduledSubscriptionByExternalReference(): void
+    {
+        $this->expectException(PaymentApiException::class);
+
+        $response = $this->createResponse([], 500);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStub(StreamFactoryInterface::class));
+        $sut->retrieveUnscheduledSubscriptionByExternalReference('ext-ref-123');
+    }
+
     public function testItRetrievesUnscheduledSubscription(): void
     {
         $unscheduledSubscriptionId = 'abc-123';

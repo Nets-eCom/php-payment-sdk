@@ -76,6 +76,34 @@ class SubscriptionApi
      * @throws PaymentApiException
      * @throws \JsonException
      */
+    public function retrieveUnscheduledSubscriptionByExternalReference(string $externalReference): RetrieveUnscheduledSubscriptionResult
+    {
+        try {
+            $response = $this->client->get(
+                \sprintf('%s?externalReference=%s', self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT, $externalReference)
+            );
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf("Couldn't retrieve unscheduled subscription for a given external reference: %s", $externalReference),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveUnscheduledSubscriptionResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
     public function retrieveUnscheduledSubscription(string $unscheduledSubscriptionId): RetrieveUnscheduledSubscriptionResult
     {
         try {

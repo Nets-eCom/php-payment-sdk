@@ -46,7 +46,7 @@ class SubscriptionApi
 
     private const UNSCHEDULED_SUBSCRIPTION_VERIFICATIONS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/verifications/%s';
 
-    private const UNSCHEDULED_SUBSCRIPTION_CHARGE_STATUS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charge/status';
+    private const UNSCHEDULED_SUBSCRIPTION_CHARGE_STATUS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charges/status';
 
     public function __construct(
         private readonly HttpClient $client,

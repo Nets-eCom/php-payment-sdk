@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace NexiCheckout\Model\Result;
 
 use NexiCheckout\Model\Result\RetrieveBulkVerifications\Verification;
-use NexiCheckout\Model\Result\RetrieveBulkVerifications\VerificationStatusEnum;
 use NexiCheckout\Model\Result\Shared\BulkOperationStatusEnum;
+use NexiCheckout\Model\Result\Shared\VerificationStatusEnum;
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
 use NexiCheckout\Model\Shared\JsonDeserializeTrait;
 

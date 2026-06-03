@@ -19,8 +19,8 @@ use NexiCheckout\Model\Request\Shared\Notification\Webhook;
 use NexiCheckout\Model\Request\Shared\Order;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Request\VerifySubscriptions\Subscription;
-use NexiCheckout\Model\Result\RetrieveBulkVerifications\VerificationStatusEnum;
 use NexiCheckout\Model\Result\Shared\BulkOperationStatusEnum;
+use NexiCheckout\Model\Result\Shared\VerificationStatusEnum;
 use NexiCheckout\Model\Result\SubscriptionCharges\ChargeStatusEnum;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -230,6 +230,77 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame(VerificationStatusEnum::SUCCEEDED, $result->getPage()[0]->getVerificationStatusEnum());
         $this->assertFalse($result->isMore());
         $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
+    }
+
+    public function testItRetrievesBulkVerificationsForUnscheduledSubscriptions(): void
+    {
+        $unscheduledSubscriptionId = '0279ca55dbc24ea697e186c3eec34b65';
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'page' => [
+                [
+                    'unscheduledSubscriptionId' => $unscheduledSubscriptionId,
+                    'paymentId' => '472e651e-5a1e-424d-8098-23858bf03ad7',
+                    'status' => 'Succeeded',
+                    'externalReference' => 'ref-123',
+                ],
+            ],
+            'more' => false,
+            'status' => 'Done',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveBulkVerificationsForUnscheduledSubscriptions($bulkId);
+
+        $this->assertSame($unscheduledSubscriptionId, $result->getPage()[0]->getUnscheduledSubscriptionId());
+        $this->assertSame(VerificationStatusEnum::SUCCEEDED, $result->getPage()[0]->getVerificationStatus());
+        $this->assertSame('ref-123', $result->getPage()[0]->getExternalReference());
+        $this->assertFalse($result->isMore());
+        $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
+    }
+
+    public function testItRetrievesBulkVerificationsForUnscheduledSubscriptionsWithPagination(): void
+    {
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'page' => [],
+            'more' => true,
+            'status' => 'Processing',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveBulkVerificationsForUnscheduledSubscriptions($bulkId, skip: 10, take: 5);
+
+        $this->assertTrue($result->isMore());
+        $this->assertSame(BulkOperationStatusEnum::PROCESSING, $result->getBulkOperationStatus());
+    }
+
+    public function testItThrowsExceptionOnClientErrorRetrieveBulkVerificationsForUnscheduledSubscriptions(): void
+    {
+        $this->expectException(ClientErrorPaymentApiException::class);
+
+        $response = $this->createResponse([
+            'errors' => [
+                'property1' => ['string'],
+            ],
+        ], 400);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+        $sut->retrieveBulkVerificationsForUnscheduledSubscriptions('bulk-id');
+    }
+
+    public function testItThrowsExceptionOnServerErrorRetrieveBulkVerificationsForUnscheduledSubscriptions(): void
+    {
+        $this->expectException(PaymentApiException::class);
+
+        $response = $this->createResponse([], 500);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStub(StreamFactoryInterface::class));
+        $sut->retrieveBulkVerificationsForUnscheduledSubscriptions('bulk-id');
     }
 
     public function testItVerifySubscriptions(): void

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Model\Result\RetrieveBulkVerifications;
+namespace NexiCheckout\Model\Result\RetrieveBulkUnscheduledVerifications;
 
 use NexiCheckout\Model\Result\Shared\VerificationStatusEnum;
 
-class Verification
+class UnscheduledVerification
 {
     public function __construct(
-        private readonly string $subscriptionId,
-        private readonly VerificationStatusEnum $processingStatusEnum,
+        private readonly string $unscheduledSubscriptionId,
+        private readonly VerificationStatusEnum $verificationStatus,
         private readonly ?string $externalReference = null,
         private readonly ?string $message = null,
         private readonly ?string $code = null,
@@ -18,14 +18,14 @@ class Verification
     ) {
     }
 
-    public function getSubscriptionId(): string
+    public function getUnscheduledSubscriptionId(): string
     {
-        return $this->subscriptionId;
+        return $this->unscheduledSubscriptionId;
     }
 
-    public function getVerificationStatusEnum(): VerificationStatusEnum
+    public function getVerificationStatus(): VerificationStatusEnum
     {
-        return $this->processingStatusEnum;
+        return $this->verificationStatus;
     }
 
     public function getExternalReference(): ?string

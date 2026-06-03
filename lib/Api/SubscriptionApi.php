@@ -16,6 +16,7 @@ use NexiCheckout\Model\Request\ChargeSubscription;
 use NexiCheckout\Model\Request\ChargeUnscheduledSubscription;
 use NexiCheckout\Model\Request\VerifySubscriptions;
 use NexiCheckout\Model\Result\BulkChargeSubscriptionResult;
+use NexiCheckout\Model\Result\RetrieveBulkUnscheduledVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveBulkVerificationsResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionBulkChargesResult;
 use NexiCheckout\Model\Result\RetrieveSubscriptionResult;
@@ -37,6 +38,8 @@ class SubscriptionApi
     private const UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT = '/v1/unscheduledsubscriptions';
 
     private const UNSCHEDULED_SUBSCRIPTION_CHARGES = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/%s/charges';
+
+    private const UNSCHEDULED_SUBSCRIPTION_VERIFICATIONS = self::UNSCHEDULED_SUBSCRIPTIONS_ENDPOINT . '/verifications/%s';
 
     public function __construct(
         private readonly HttpClient $client,
@@ -273,6 +276,49 @@ class SubscriptionApi
         }
 
         return RetrieveBulkVerificationsResult::fromJson($contents);
+    }
+
+    /**
+     * @throws PaymentApiException
+     * @throws \JsonException
+     */
+    public function retrieveBulkVerificationsForUnscheduledSubscriptions(
+        string $bulkId,
+        ?int $skip = null,
+        ?int $take = null,
+        ?int $pageNumber = null,
+        ?int $pageSize = null,
+    ): RetrieveBulkUnscheduledVerificationsResult {
+        $url = \sprintf(self::UNSCHEDULED_SUBSCRIPTION_VERIFICATIONS, $bulkId);
+        $queryParams = \array_filter([
+            'skip' => $skip,
+            'take' => $take,
+            'pageNumber' => $pageNumber,
+            'pageSize' => $pageSize,
+        ]);
+
+        if ($queryParams !== []) {
+            $url .= '?' . \http_build_query($queryParams);
+        }
+
+        try {
+            $response = $this->client->get($url);
+        } catch (HttpClientException $httpClientException) {
+            throw new PaymentApiException(
+                \sprintf("Couldn't retrieve bulk verifications for unscheduled subscriptions with bulk ID: %s", $bulkId),
+                $httpClientException->getCode(),
+                $httpClientException
+            );
+        }
+
+        $code = $response->getStatusCode();
+        $contents = $response->getBody()->getContents();
+
+        if (!$this->isSuccessCode($code)) {
+            throw $this->createPaymentApiException($code, $contents);
+        }
+
+        return RetrieveBulkUnscheduledVerificationsResult::fromJson($contents);
     }
 
     /**

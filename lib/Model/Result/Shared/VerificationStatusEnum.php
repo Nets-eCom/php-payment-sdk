@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NexiCheckout\Model\Result\RetrieveBulkVerifications;
+namespace NexiCheckout\Model\Result\Shared;
 
 enum VerificationStatusEnum: string
 {

@@ -6,6 +6,7 @@ namespace NexiCheckout\Tests\Api;
 
 use NexiCheckout\Api\Exception\ClientErrorPaymentApiException;
 use NexiCheckout\Api\Exception\PaymentApiException;
+use NexiCheckout\Api\Exception\RateLimitExceededException;
 use NexiCheckout\Api\Exception\UnauthorizedApiException;
 use NexiCheckout\Api\PaymentApi;
 use NexiCheckout\Http\Configuration;
@@ -169,6 +170,16 @@ final class PaymentApiTest extends TestCase
         $this->expectException(UnauthorizedApiException::class);
 
         $response = $this->createResponse([], 401);
+
+        $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
+        $sut->createHostedPayment($this->createPaymentRequest());
+    }
+
+    public function testItThrowsExceptionOnRateLimitExceeded(): void
+    {
+        $this->expectException(RateLimitExceededException::class);
+
+        $response = $this->createResponse([], 429);
 
         $sut = $this->createPaymentApi($response, $this->createStub(StreamFactoryInterface::class));
         $sut->createHostedPayment($this->createPaymentRequest());

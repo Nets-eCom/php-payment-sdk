@@ -3,3 +3,4 @@ parameters:
 	paths:
 		- lib
 		- tests
+		- examples

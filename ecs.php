@@ -13,6 +13,7 @@ return ECSConfig::configure()
     ->withPaths([
         __DIR__ . '/lib',
         __DIR__ . '/tests',
+        __DIR__ . '/examples',
     ])
     ->withPreparedSets(psr12: true, common: true)
     ->withConfiguredRule(

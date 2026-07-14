@@ -2,6 +2,8 @@
 
 ## Examples
 
+Runnable development examples live in [examples](examples).
+
 - Setup using configuration provider & api factory
 
 ```php

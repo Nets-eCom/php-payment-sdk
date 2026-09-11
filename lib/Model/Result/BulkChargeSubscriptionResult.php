@@ -20,6 +20,6 @@ class BulkChargeSubscriptionResult implements JsonDeserializeInterface
 
     public static function fromJson(string $string): BulkChargeSubscriptionResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

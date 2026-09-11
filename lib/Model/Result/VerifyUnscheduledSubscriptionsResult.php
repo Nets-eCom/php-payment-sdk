@@ -11,6 +11,6 @@ class VerifyUnscheduledSubscriptionsResult extends VerifySubscriptionsResult imp
 
     public static function fromJson(string $string): VerifyUnscheduledSubscriptionsResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

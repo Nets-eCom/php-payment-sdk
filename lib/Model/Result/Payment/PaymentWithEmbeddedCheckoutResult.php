@@ -14,6 +14,6 @@ class PaymentWithEmbeddedCheckoutResult extends PaymentResult implements JsonDes
 
     public static function fromJson(string $string): PaymentWithEmbeddedCheckoutResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

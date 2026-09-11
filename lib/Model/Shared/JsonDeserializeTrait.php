@@ -13,4 +13,12 @@ trait JsonDeserializeTrait
     {
         return json_decode($string, true, 512, \JSON_INVALID_UTF8_IGNORE);
     }
+
+    /**
+     * @return array<mixed>
+     */
+    protected static function jsonDeserializeToClassVars(string $string): array
+    {
+        return array_intersect_key(static::jsonDeserialize($string), get_class_vars(static::class));
+    }
 }

@@ -6,7 +6,7 @@ use NexiCheckout\Model\Result\PaymentResult;
 use NexiCheckout\Model\Shared\JsonDeserializeInterface;
 use NexiCheckout\Model\Shared\JsonDeserializeTrait;
 
-class PaymentWithHostedCheckoutResult extends PaymentResult implements JsonDeserializeInterface
+final class PaymentWithHostedCheckoutResult extends PaymentResult implements JsonDeserializeInterface
 {
     use JsonDeserializeTrait;
 
@@ -24,6 +24,7 @@ class PaymentWithHostedCheckoutResult extends PaymentResult implements JsonDeser
 
     public static function fromJson(string $string): PaymentWithHostedCheckoutResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
+
     }
 }

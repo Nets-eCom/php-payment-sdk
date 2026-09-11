@@ -30,6 +30,6 @@ final class ChargeResult implements JsonDeserializeInterface
 
     public static function fromJson(string $string): ChargeResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

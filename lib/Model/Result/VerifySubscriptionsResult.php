@@ -9,7 +9,7 @@ class VerifySubscriptionsResult implements JsonDeserializeInterface
 {
     use JsonDeserializeTrait;
 
-    public function __construct(private readonly string $bulkId)
+    public function __construct(protected readonly string $bulkId)
     {
     }
 
@@ -20,6 +20,6 @@ class VerifySubscriptionsResult implements JsonDeserializeInterface
 
     public static function fromJson(string $string): VerifySubscriptionsResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

@@ -25,6 +25,6 @@ final class CardPaymentResult extends PaymentResult implements JsonDeserializeIn
 
     public static function fromJson(string $string): CardPaymentResult
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

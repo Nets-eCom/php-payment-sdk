@@ -22,6 +22,6 @@ class RefundPaymentResult implements JsonDeserializeInterface
 
     public static function fromJson(string $string): self
     {
-        return new self(...self::jsonDeserialize($string));
+        return new self(...self::jsonDeserializeToClassVars($string));
     }
 }

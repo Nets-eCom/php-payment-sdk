@@ -10,10 +10,14 @@ final class PaymentWithHostedCheckoutResult extends PaymentResult implements Jso
 {
     use JsonDeserializeTrait;
 
+    private readonly ?\DateTimeInterface $expiresAt;
+
     public function __construct(
         protected string $paymentId,
-        private readonly string $hostedPaymentPageUrl
+        private readonly string $hostedPaymentPageUrl,
+        ?\DateTimeInterface $expiresAt = null,
     ) {
+        $this->expiresAt = $expiresAt;
         parent::__construct($paymentId);
     }
 
@@ -22,9 +26,19 @@ final class PaymentWithHostedCheckoutResult extends PaymentResult implements Jso
         return $this->hostedPaymentPageUrl;
     }
 
+    public function getExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->expiresAt;
+    }
+
     public static function fromJson(string $string): PaymentWithHostedCheckoutResult
     {
-        return new self(...self::jsonDeserializeToClassVars($string));
+        $vars = self::jsonDeserializeToClassVars($string);
 
+        if (isset($vars['expiresAt'])) {
+            $vars['expiresAt'] = new \DateTimeImmutable($vars['expiresAt']);
+        }
+
+        return new self(...$vars);
     }
 }

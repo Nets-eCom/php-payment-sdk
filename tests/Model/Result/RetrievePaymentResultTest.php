@@ -17,6 +17,47 @@ class RetrievePaymentResultTest extends TestCase
         );
     }
 
+    public function testExpiresAtIsParsedFromJson(): void
+    {
+        $json = <<<JSON
+        {
+            "payment": {
+                "paymentId": "025400006091b1ef6937598058c4e487",
+                "consumer": {
+                    "shippingAddress": {},
+                    "billingAddress": {},
+                    "privatePerson": {},
+                    "company": {}
+                },
+                "orderDetails": {
+                    "amount": 100,
+                    "currency": "EUR"
+                },
+                "checkout": {
+                    "url": "https://example.com/checkout"
+                },
+                "created": "2019-08-24T14:15:22Z",
+                "summary": {
+                    "reservedAmount": 0,
+                    "reservedSurchargeAmount": 0
+                },
+                "expiresAt": "2026-10-08T14:15:22Z"
+            }
+        }
+        JSON;
+
+        $result = RetrievePaymentResult::fromJson($json);
+
+        $this->assertEquals(new \DateTimeImmutable('2026-10-08T14:15:22Z'), $result->getPayment()->getExpiresAt());
+    }
+
+    public function testExpiresAtIsNullWhenAbsentFromJson(): void
+    {
+        $result = RetrievePaymentResult::fromJson($this->getReservedPaymentResult());
+
+        $this->assertNull($result->getPayment()->getExpiresAt());
+    }
+
     private function getReservedPaymentResult(): string
     {
         return <<<JSON

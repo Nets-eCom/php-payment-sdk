@@ -12,8 +12,29 @@ class PaymentWithEmbeddedCheckoutResult extends PaymentResult implements JsonDes
 {
     use JsonDeserializeTrait;
 
+    private readonly ?\DateTimeInterface $expiresAt;
+
+    public function __construct(
+        protected string $paymentId,
+        ?\DateTimeInterface $expiresAt = null,
+    ) {
+        $this->expiresAt = $expiresAt;
+        parent::__construct($paymentId);
+    }
+
+    public function getExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->expiresAt;
+    }
+
     public static function fromJson(string $string): PaymentWithEmbeddedCheckoutResult
     {
-        return new self(...self::jsonDeserializeToClassVars($string));
+        $vars = self::jsonDeserializeToClassVars($string);
+
+        if (isset($vars['expiresAt'])) {
+            $vars['expiresAt'] = new \DateTimeImmutable($vars['expiresAt']);
+        }
+
+        return new self(...$vars);
     }
 }

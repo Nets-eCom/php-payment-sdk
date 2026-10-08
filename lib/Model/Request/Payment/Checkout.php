@@ -21,6 +21,7 @@ abstract class Checkout implements \JsonSerializable
         protected ?bool $isPublicDevice = null,
         protected ?Appearance $appearance = null,
         protected ?string $countryCode = null,
+        protected ?\DateTimeInterface $expiresAt = null,
     ) {
     }
 
@@ -36,7 +37,8 @@ abstract class Checkout implements \JsonSerializable
      *     publicDevice: ?bool,
      *     merchantHandlesConsumerData: ?bool,
      *     appearance: ?Appearance,
-     *     countryCode: ?string
+     *     countryCode: ?string,
+     *     expiresAt: ?string
      * }
      */
     public function jsonSerialize(): array
@@ -53,6 +55,7 @@ abstract class Checkout implements \JsonSerializable
             'publicDevice' => $this->isPublicDevice,
             'appearance' => $this->appearance,
             'countryCode' => $this->countryCode,
+            'expiresAt' => $this->expiresAt?->format(\DateTimeInterface::ATOM),
         ];
     }
 }

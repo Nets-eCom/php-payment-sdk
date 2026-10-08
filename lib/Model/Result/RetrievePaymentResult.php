@@ -86,7 +86,8 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             isset($data['charges']) ? self::createCharges($data['charges']) : null,
             isset($data['subscription']) ? self::createSubscription($data['subscription']) : null,
             isset($data['unscheduledSubscription']) ? self::createUnscheduledSubscription($data['unscheduledSubscription']) : null,
-            $data['myReference'] ?? null
+            $data['myReference'] ?? null,
+            isset($data['expiresAt']) ? new \DateTimeImmutable($data['expiresAt']) : null,
         );
     }
 

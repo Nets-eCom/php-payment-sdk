@@ -19,6 +19,7 @@ class EmbeddedCheckout extends Checkout
         protected ?bool $isPublicDevice = null,
         protected ?Appearance $appearance = null,
         protected ?string $countryCode = null,
+        protected ?\DateTimeInterface $expiresAt = null,
     ) {
         parent::__construct(
             $termsUrl,
@@ -31,7 +32,8 @@ class EmbeddedCheckout extends Checkout
             $consumerType,
             $isPublicDevice,
             $appearance,
-            $countryCode
+            $countryCode,
+            $expiresAt,
         );
     }
 

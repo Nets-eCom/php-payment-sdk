@@ -20,6 +20,7 @@ class HostedCheckout extends Checkout
         protected ?bool $isPublicDevice = null,
         protected ?Appearance $appearance = null,
         protected ?string $countryCode = null,
+        protected ?\DateTimeInterface $expiresAt = null,
     ) {
         parent::__construct(
             $this->termsUrl,
@@ -32,7 +33,8 @@ class HostedCheckout extends Checkout
             $consumerType,
             $isPublicDevice,
             $appearance,
-            $countryCode
+            $countryCode,
+            $expiresAt,
         );
     }
 

@@ -56,6 +56,22 @@ final class PaymentApiTest extends TestCase
 
         $this->assertSame('1234', $result->getPaymentId());
         $this->assertSame('https://api.example.com/hostedUrl', $result->getHostedPaymentPageUrl());
+        $this->assertNull($result->getExpiresAt());
+    }
+
+    public function testItCreatesHostedPaymentWithExpiresAt(): void
+    {
+        $response = $this->createResponse([
+            'paymentId' => '1234',
+            'hostedPaymentPageUrl' => 'https://api.example.com/hostedUrl',
+            'expiresAt' => '2026-10-08T14:15:22Z',
+        ], 200);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->createHostedPayment($this->createPaymentRequest());
+
+        $this->assertEquals(new \DateTimeImmutable('2026-10-08T14:15:22Z'), $result->getExpiresAt());
     }
 
     public function testItCreatesEmbeddedPayment(): void
@@ -69,6 +85,21 @@ final class PaymentApiTest extends TestCase
         $result = $sut->createEmbeddedPayment($this->createPaymentRequest());
 
         $this->assertSame('1234', $result->getPaymentId());
+        $this->assertNull($result->getExpiresAt());
+    }
+
+    public function testItCreatesEmbeddedPaymentWithExpiresAt(): void
+    {
+        $response = $this->createResponse([
+            'paymentId' => '1234',
+            'expiresAt' => '2026-10-08T14:15:22Z',
+        ], 200);
+
+        $sut = $this->createPaymentApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->createEmbeddedPayment($this->createPaymentRequest());
+
+        $this->assertEquals(new \DateTimeImmutable('2026-10-08T14:15:22Z'), $result->getExpiresAt());
     }
 
     public function testItCreatesCardPayment(): void

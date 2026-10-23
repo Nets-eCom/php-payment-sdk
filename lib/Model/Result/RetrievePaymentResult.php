@@ -38,14 +38,16 @@ class RetrievePaymentResult implements JsonDeserializeInterface
     /**
      * @param array{
      *     url: string,
-     *     cancelUrl: ?string
+     *     cancelUrl: ?string,
+     *     expiresAt: ?string
      * } $data
      */
     public static function createCheckout(array $data): Checkout
     {
         return new Checkout(
             $data['url'],
-            $data['cancelUrl'] ?? null
+            $data['cancelUrl'] ?? null,
+            isset($data['expiresAt']) ? new \DateTimeImmutable($data['expiresAt']) : null,
         );
     }
 
@@ -87,7 +89,6 @@ class RetrievePaymentResult implements JsonDeserializeInterface
             isset($data['subscription']) ? self::createSubscription($data['subscription']) : null,
             isset($data['unscheduledSubscription']) ? self::createUnscheduledSubscription($data['unscheduledSubscription']) : null,
             $data['myReference'] ?? null,
-            isset($data['expiresAt']) ? new \DateTimeImmutable($data['expiresAt']) : null,
         );
     }
 

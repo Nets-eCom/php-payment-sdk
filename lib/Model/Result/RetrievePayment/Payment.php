@@ -26,7 +26,6 @@ class Payment
         private readonly ?Subscription $subscription = null,
         private readonly ?UnscheduledSubscription $unscheduledSubscription = null,
         private readonly ?string $myReference = null,
-        private readonly ?\DateTimeInterface $expiresAt = null,
     ) {
         $this->status = $this->specifyStatus();
     }
@@ -94,11 +93,6 @@ class Payment
     public function getMyReference(): ?string
     {
         return $this->myReference;
-    }
-
-    public function getExpiresAt(): ?\DateTimeInterface
-    {
-        return $this->expiresAt;
     }
 
     public function getStatus(): PaymentStatusEnum

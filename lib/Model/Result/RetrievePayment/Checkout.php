@@ -6,8 +6,11 @@ namespace NexiCheckout\Model\Result\RetrievePayment;
 
 class Checkout
 {
-    public function __construct(private readonly string $url, private readonly ?string $cancelUrl = null)
-    {
+    public function __construct(
+        private readonly string $url,
+        private readonly ?string $cancelUrl = null,
+        private readonly ?\DateTimeInterface $expiresAt = null,
+    ) {
     }
 
     public function getUrl(): string
@@ -18,5 +21,10 @@ class Checkout
     public function getCancelUrl(): ?string
     {
         return $this->cancelUrl;
+    }
+
+    public function getExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->expiresAt;
     }
 }

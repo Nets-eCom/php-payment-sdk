@@ -17,6 +17,24 @@ class OrderItem
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            reference: $data['reference'],
+            name: $data['name'],
+            quantity: $data['quantity'],
+            unit: $data['unit'],
+            unitPrice: $data['unitPrice'],
+            taxRate: $data['taxRate'],
+            taxAmount: $data['taxAmount'],
+            netTotalAmount: $data['netTotalAmount'],
+            grossTotalAmount: $data['grossTotalAmount'],
+        );
+    }
+
     public function getReference(): string
     {
         return $this->reference;

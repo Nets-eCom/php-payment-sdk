@@ -12,6 +12,19 @@ class ThreeDSecure
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            acsUrl: $data['acsUrl'],
+            authenticationEnrollmentStatus: $data['authenticationEnrollmentStatus'],
+            authenticationStatus: $data['authenticationStatus'],
+            eci: $data['eci'],
+        );
+    }
+
     public function getAcsUrl(): string
     {
         return $this->acsUrl;

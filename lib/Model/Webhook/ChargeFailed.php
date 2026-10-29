@@ -69,11 +69,11 @@ class ChargeFailed implements WebhookInterface, JsonDeserializeInterface
     {
         return new ChargeFailedData(
             $data['paymentId'],
-            new Error(...$data['error']),
+            Error::fromArray($data['error']),
             $data['chargeId'],
             $data['reconciliationReference'],
-            array_map(fn (array $orderItem) => new OrderItem(...$orderItem), $data['orderItems']),
-            new Amount(...$data['amount']),
+            array_map(fn (array $orderItem) => OrderItem::fromArray($orderItem), $data['orderItems']),
+            Amount::fromArray($data['amount']),
             isset($data['invoiceDetails']) ? self::createInvoiceDetails($data['invoiceDetails']) : null
         );
     }

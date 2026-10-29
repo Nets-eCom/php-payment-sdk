@@ -16,6 +16,7 @@ use NexiCheckout\Model\Webhook\RefundInitiated;
 use NexiCheckout\Model\Webhook\ReservationCreated;
 use NexiCheckout\Model\Webhook\ReservationCreatedV1;
 use NexiCheckout\Model\Webhook\ReservationFailed;
+use NexiCheckout\Model\Webhook\UnknownWebhookEventException;
 use NexiCheckout\Model\Webhook\WebhookBuilder;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -39,6 +40,62 @@ final class WebhookBuilderTest extends TestCase
             $this->assertSame($expectedValue, $propertyAccessor->getValue($result, $accessorStr));
         }
 
+    }
+
+    public function testUnknownFieldsInNestedObjectsDoNotCrash(): void
+    {
+        $payload = json_encode([
+            'id' => '01ee00006091b2196937598058c4e488',
+            'timestamp' => '2021-05-04T22:44:10.1185+02:00',
+            'merchantNumber' => 100017120,
+            'event' => 'payment.charge.created.v2',
+            'data' => [
+                'chargeId' => '01ee00006091b2196937598058c4e488',
+                'paymentId' => '025400006091b1ef6937598058c4e487',
+                'paymentMethod' => 'Visa',
+                'paymentType' => 'CARD',
+                'amount' => [
+                    'amount' => 5500,
+                    'currency' => 'SEK',
+                    'newUnknownField' => 'someValue',
+                ],
+                'orderItems' => [
+                    [
+                        'reference' => 'ref1',
+                        'name' => 'Item',
+                        'quantity' => 1,
+                        'unit' => 'pcs',
+                        'unitPrice' => 5500,
+                        'taxRate' => 0,
+                        'taxAmount' => 0,
+                        'netTotalAmount' => 5500,
+                        'grossTotalAmount' => 5500,
+                        'newUnknownField' => 'someValue',
+                    ],
+                ],
+            ],
+        ]);
+
+        $result = WebhookBuilder::fromJson($payload);
+
+        $this->assertInstanceOf(ChargeCreated::class, $result);
+        $this->assertSame(5500, $result->getData()->getAmount()->getAmount());
+    }
+
+    public function testUnknownEventThrowsDomainException(): void
+    {
+        $payload = json_encode([
+            'id' => 'abc123',
+            'timestamp' => '2021-05-04T22:44:10.1185+02:00',
+            'merchantNumber' => 100017120,
+            'event' => 'payment.new.event.v99',
+            'data' => [],
+        ]);
+
+        $this->expectException(UnknownWebhookEventException::class);
+        $this->expectExceptionMessage('payment.new.event.v99');
+
+        WebhookBuilder::fromJson($payload);
     }
 
     /**

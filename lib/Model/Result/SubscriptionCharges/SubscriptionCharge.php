@@ -8,7 +8,7 @@ class SubscriptionCharge
 {
     public function __construct(
         private readonly string $subscriptionId,
-        private readonly ChargeStatusEnum $status,
+        private readonly ?ChargeStatusEnum $status,
         private readonly ?string $paymentId = null,
         private readonly ?string $chargeId = null,
         private readonly ?string $message = null,
@@ -23,7 +23,7 @@ class SubscriptionCharge
         return $this->subscriptionId;
     }
 
-    public function getChargeStatus(): ChargeStatusEnum
+    public function getChargeStatus(): ?ChargeStatusEnum
     {
         return $this->status;
     }

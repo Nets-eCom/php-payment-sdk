@@ -69,9 +69,9 @@ class ReservationFailed implements WebhookInterface, JsonDeserializeInterface
     {
         return new ReservationFailedData(
             paymentId: $data['paymentId'],
-            error: new Error(...$data['error']),
-            orderItems: array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $data['orderItems']),
-            amount: new Amount(...$data['amount']),
+            error: Error::fromArray($data['error']),
+            orderItems: array_map(fn (array $orderItem): OrderItem => OrderItem::fromArray($orderItem), $data['orderItems']),
+            amount: Amount::fromArray($data['amount']),
         );
     }
 }

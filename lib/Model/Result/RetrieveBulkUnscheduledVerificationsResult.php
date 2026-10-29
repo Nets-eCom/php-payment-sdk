@@ -20,7 +20,7 @@ class RetrieveBulkUnscheduledVerificationsResult implements JsonDeserializeInter
     public function __construct(
         private readonly array $page,
         private readonly bool $more,
-        private readonly BulkOperationStatusEnum $bulkOperationStatus,
+        private readonly ?BulkOperationStatusEnum $bulkOperationStatus,
     ) {
     }
 
@@ -37,7 +37,7 @@ class RetrieveBulkUnscheduledVerificationsResult implements JsonDeserializeInter
         return $this->more;
     }
 
-    public function getBulkOperationStatus(): BulkOperationStatusEnum
+    public function getBulkOperationStatus(): ?BulkOperationStatusEnum
     {
         return $this->bulkOperationStatus;
     }
@@ -49,7 +49,7 @@ class RetrieveBulkUnscheduledVerificationsResult implements JsonDeserializeInter
         $page = array_map(
             fn (array $item) => new UnscheduledVerification(
                 $item['unscheduledSubscriptionId'],
-                VerificationStatusEnum::from($item['status']),
+                VerificationStatusEnum::tryFrom($item['status']),
                 $item['externalReference'] ?? null,
                 $item['message'] ?? null,
                 $item['code'] ?? null,
@@ -58,6 +58,6 @@ class RetrieveBulkUnscheduledVerificationsResult implements JsonDeserializeInter
             $data['page']
         );
 
-        return new self($page, $data['more'], BulkOperationStatusEnum::from($data['status']));
+        return new self($page, $data['more'], BulkOperationStatusEnum::tryFrom($data['status']));
     }
 }

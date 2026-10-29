@@ -10,7 +10,7 @@ class Verification
 {
     public function __construct(
         private readonly string $subscriptionId,
-        private readonly VerificationStatusEnum $processingStatusEnum,
+        private readonly ?VerificationStatusEnum $processingStatusEnum,
         private readonly ?string $externalReference = null,
         private readonly ?string $message = null,
         private readonly ?string $code = null,
@@ -23,7 +23,7 @@ class Verification
         return $this->subscriptionId;
     }
 
-    public function getVerificationStatusEnum(): VerificationStatusEnum
+    public function getVerificationStatusEnum(): ?VerificationStatusEnum
     {
         return $this->processingStatusEnum;
     }

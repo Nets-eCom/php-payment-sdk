@@ -68,7 +68,7 @@ class RefundCompleted implements WebhookInterface, JsonDeserializeInterface
         return new RefundCompletedData(
             paymentId: $data['paymentId'],
             refundId: $data['refundId'],
-            amount: new Amount(...$data['amount']),
+            amount: Amount::fromArray($data['amount']),
             invoiceDetails: isset($data['invoiceDetails']) ? self::createInvoiceDetails($data['invoiceDetails']) : null,
         );
     }

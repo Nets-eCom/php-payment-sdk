@@ -85,10 +85,10 @@ class RefundFailed implements WebhookInterface, JsonDeserializeInterface
     {
         return new RefundFailedData(
             $data['paymentId'],
-            new Error(...$data['error']),
+            Error::fromArray($data['error']),
             $data['refundId'],
             $data['reconciliationReference'],
-            new Amount(...$data['amount']),
+            Amount::fromArray($data['amount']),
             isset($data['invoiceDetails']) ? self::createInvoiceDetails($data['invoiceDetails']) : null
         );
     }

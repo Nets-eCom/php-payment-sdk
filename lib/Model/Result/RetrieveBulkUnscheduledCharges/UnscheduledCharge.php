@@ -10,7 +10,7 @@ class UnscheduledCharge
 {
     public function __construct(
         private readonly string $unscheduledSubscriptionId,
-        private readonly ChargeStatusEnum $status,
+        private readonly ?ChargeStatusEnum $status,
         private readonly ?string $paymentId = null,
         private readonly ?string $chargeId = null,
         private readonly ?string $message = null,
@@ -25,7 +25,7 @@ class UnscheduledCharge
         return $this->unscheduledSubscriptionId;
     }
 
-    public function getStatus(): ChargeStatusEnum
+    public function getStatus(): ?ChargeStatusEnum
     {
         return $this->status;
     }

@@ -69,8 +69,8 @@ class PaymentCreated implements WebhookInterface, JsonDeserializeInterface
     private static function createOrder(array $data): Order
     {
         return new Order(
-            new Amount(...$data['amount']),
-            array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $data['orderItems']),
+            Amount::fromArray($data['amount']),
+            array_map(fn (array $orderItem): OrderItem => OrderItem::fromArray($orderItem), $data['orderItems']),
             $data['reference'] ?? null,
         );
     }

@@ -10,7 +10,7 @@ class UnscheduledVerification
 {
     public function __construct(
         private readonly string $unscheduledSubscriptionId,
-        private readonly VerificationStatusEnum $verificationStatus,
+        private readonly ?VerificationStatusEnum $verificationStatus,
         private readonly ?string $externalReference = null,
         private readonly ?string $message = null,
         private readonly ?string $code = null,
@@ -23,7 +23,7 @@ class UnscheduledVerification
         return $this->unscheduledSubscriptionId;
     }
 
-    public function getVerificationStatus(): VerificationStatusEnum
+    public function getVerificationStatus(): ?VerificationStatusEnum
     {
         return $this->verificationStatus;
     }

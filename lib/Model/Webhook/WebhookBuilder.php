@@ -11,7 +11,11 @@ class WebhookBuilder
     public static function fromJson(string $string): WebhookInterface
     {
         $payload = self::jsonDeserialize($string);
-        $eventName = EventNameEnum::from($payload['event']);
+        $eventName = EventNameEnum::tryFrom($payload['event']);
+
+        if ($eventName === null) {
+            throw new UnknownWebhookEventException($payload['event']);
+        }
 
         return match ($eventName) {
             EventNameEnum::PAYMENT_CREATED => PaymentCreated::fromJson($string),

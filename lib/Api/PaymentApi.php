@@ -440,7 +440,7 @@ class PaymentApi
     {
         return match (true) {
             $code >= 300 && $code < 400 => new PaymentApiException('Redirection not supported'),
-            $code === 400 => new ClientErrorPaymentApiException(\sprintf('Client error: %s', $contents), $contents),
+            $code === 400 => new ClientErrorPaymentApiException(\sprintf('Client error: %s', $contents), $contents, $code),
             $code === 401 => new UnauthorizedApiException(\sprintf('Unauthorized: %s', $contents)),
             $code === 404 => new PaymentApiException(\sprintf('Client error: %s', $contents)),
             $code === 429 => new RateLimitExceededException(\sprintf('Rate Limit Exceeded: %s', $contents)),

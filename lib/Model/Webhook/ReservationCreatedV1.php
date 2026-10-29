@@ -73,7 +73,7 @@ class ReservationCreatedV1 implements WebhookInterface, JsonDeserializeInterface
             paymentMethod: $data['paymentMethod'],
             paymentType: $data['paymentType'],
             consumer: self::createConsumer($data['consumer']),
-            amount: new Amount(...$data['amount']),
+            amount: Amount::fromArray($data['amount']),
             cardDetails: isset($data['cardDetails']) ? self::createCardDetails($data['cardDetails']) : null,
             myReference: $data['myReference'] ?? null,
             reserveId : $data['reserveId'] ?? null,
@@ -128,7 +128,7 @@ class ReservationCreatedV1 implements WebhookInterface, JsonDeserializeInterface
             expiryYear: $cardDetails['expiryYear'],
             issuerCountry: $cardDetails['issuerCountry'],
             truncatedPan: $cardDetails['truncatedPan'],
-            threeDSecure: $cardDetails['threeDSecure'] ? new ThreeDSecure(...$cardDetails['threeDSecure']) : null,
+            threeDSecure: $cardDetails['threeDSecure'] ? ThreeDSecure::fromArray($cardDetails['threeDSecure']) : null,
         );
     }
 }

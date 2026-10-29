@@ -234,6 +234,29 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
     }
 
+    public function testItRetrievesSubscriptionBulkChargesWithUnknownStatus(): void
+    {
+        $bulkId = '50490f2b-98bd-4782-b08d-413ee70aa1f7';
+
+        $response = $this->createResponse([
+            'page' => [
+                [
+                    'subscriptionId' => 'sub-1',
+                    'status' => 'NewUnknownStatus',
+                ],
+            ],
+            'more' => false,
+            'status' => 'NewUnknownBulkStatus',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveSubscriptionBulkCharges($bulkId);
+
+        $this->assertNull($result->getPage()[0]->getChargeStatus());
+        $this->assertNull($result->getBulkOperationStatus());
+    }
+
     public function testItBulkChargesUnscheduledSubscriptions(): void
     {
         $bulkId = '878a443c-e535-48b3-aa7a-2853592c3ce8';
@@ -352,6 +375,29 @@ final class SubscriptionApiTest extends TestCase
         $this->assertSame('ref-123', $result->getPage()[0]->getExternalReference());
         $this->assertFalse($result->isMore());
         $this->assertSame(BulkOperationStatusEnum::DONE, $result->getBulkOperationStatus());
+    }
+
+    public function testItRetrievesBulkUnscheduledChargesWithUnknownStatus(): void
+    {
+        $bulkId = '384760c02faf45a69376a3edff6c8415';
+
+        $response = $this->createResponse([
+            'page' => [
+                [
+                    'unscheduledSubscriptionId' => 'sub-1',
+                    'status' => 'NewUnknownStatus',
+                ],
+            ],
+            'more' => false,
+            'status' => 'NewUnknownBulkStatus',
+        ], 200);
+
+        $sut = $this->createSubscriptionApi($response, $this->createStreamFactory($response->getBody()));
+
+        $result = $sut->retrieveBulkUnscheduledCharges($bulkId);
+
+        $this->assertNull($result->getPage()[0]->getStatus());
+        $this->assertNull($result->getBulkOperationStatus());
     }
 
     public function testItRetrievesBulkUnscheduledChargesWithPagination(): void

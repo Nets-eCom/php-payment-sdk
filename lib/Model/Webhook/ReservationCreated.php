@@ -67,7 +67,7 @@ class ReservationCreated implements WebhookInterface, JsonDeserializeInterface
             paymentId: $data['paymentId'],
             paymentMethod: $data['paymentMethod'],
             paymentType: $data['paymentType'],
-            amount: new Amount(...$data['amount']),
+            amount: Amount::fromArray($data['amount']),
             myReference: $data['myReference'] ?? null,
             subscriptionId: $data['subscriptionId'] ?? null,
             reconciliationReference: $data['reconciliationReference'] ?? null,

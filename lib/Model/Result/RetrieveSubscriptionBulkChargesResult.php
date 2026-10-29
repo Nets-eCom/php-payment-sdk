@@ -20,7 +20,7 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
     public function __construct(
         private readonly array $page,
         private readonly bool $more,
-        private readonly BulkOperationStatusEnum $bulkOperationStatus,
+        private readonly ?BulkOperationStatusEnum $bulkOperationStatus,
     ) {
     }
 
@@ -37,7 +37,7 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
         return $this->more;
     }
 
-    public function getBulkOperationStatus(): BulkOperationStatusEnum
+    public function getBulkOperationStatus(): ?BulkOperationStatusEnum
     {
         return $this->bulkOperationStatus;
     }
@@ -49,7 +49,7 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
         $charges = array_map(
             fn (array $charge) => new SubscriptionCharge(
                 $charge['subscriptionId'],
-                ChargeStatusEnum::from($charge['status']),
+                ChargeStatusEnum::tryFrom($charge['status']),
                 $charge['paymentId'] ?? null,
                 $charge['chargeId'] ?? null,
                 $charge['message'] ?? null,
@@ -60,6 +60,6 @@ class RetrieveSubscriptionBulkChargesResult implements JsonDeserializeInterface
             $payload['page']
         );
 
-        return new self($charges, $payload['more'], BulkOperationStatusEnum::from($payload['status']));
+        return new self($charges, $payload['more'], BulkOperationStatusEnum::tryFrom($payload['status']));
     }
 }

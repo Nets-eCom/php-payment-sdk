@@ -20,7 +20,7 @@ class RetrieveBulkVerificationsResult implements JsonDeserializeInterface
     public function __construct(
         private readonly array $page,
         private readonly bool $more,
-        private readonly BulkOperationStatusEnum $bulkOperationStatus
+        private readonly ?BulkOperationStatusEnum $bulkOperationStatus
     ) {
     }
 
@@ -37,7 +37,7 @@ class RetrieveBulkVerificationsResult implements JsonDeserializeInterface
         return $this->more;
     }
 
-    public function getBulkOperationStatus(): BulkOperationStatusEnum
+    public function getBulkOperationStatus(): ?BulkOperationStatusEnum
     {
         return $this->bulkOperationStatus;
     }
@@ -49,7 +49,7 @@ class RetrieveBulkVerificationsResult implements JsonDeserializeInterface
         return new self(
             self::createPage($data['page']),
             $data['more'],
-            BulkOperationStatusEnum::from($data['status'])
+            BulkOperationStatusEnum::tryFrom($data['status'])
         );
     }
 
@@ -74,7 +74,7 @@ class RetrieveBulkVerificationsResult implements JsonDeserializeInterface
         foreach ($data as $verification) {
             $pages[] = new Verification(
                 $verification['subscriptionId'],
-                VerificationStatusEnum::from($verification['status']),
+                VerificationStatusEnum::tryFrom($verification['status']),
                 $verification['externalReference'] ?? null,
                 $verification['message'] ?? null,
                 $verification['code'] ?? null,

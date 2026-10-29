@@ -94,10 +94,10 @@ class CancelFailed implements WebhookInterface, JsonDeserializeInterface
     {
         return new CancelFailedData(
             $data['paymentId'],
-            new Error(...$data['error']),
+            Error::fromArray($data['error']),
             $data['cancelId'],
-            array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $data['orderItems']),
-            new Amount(...$data['amount']),
+            array_map(fn (array $orderItem): OrderItem => OrderItem::fromArray($orderItem), $data['orderItems']),
+            Amount::fromArray($data['amount']),
             $data['myReference'] ?? null,
         );
     }

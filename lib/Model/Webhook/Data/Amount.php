@@ -10,6 +10,17 @@ class Amount
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            amount: $data['amount'],
+            currency: $data['currency'],
+        );
+    }
+
     public function getAmount(): int
     {
         return $this->amount;

@@ -78,8 +78,8 @@ class CheckoutCompleted implements WebhookInterface, JsonDeserializeInterface
         return new CheckoutCompletedData(
             $data['paymentId'],
             new Order(
-                new Amount(...$order['amount']),
-                array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $order['orderItems']),
+                Amount::fromArray($order['amount']),
+                array_map(fn (array $orderItem): OrderItem => OrderItem::fromArray($orderItem), $order['orderItems']),
                 $order['reference'] ?? null,
             ),
             new Consumer(

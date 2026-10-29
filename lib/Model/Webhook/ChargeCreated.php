@@ -69,8 +69,8 @@ class ChargeCreated implements WebhookInterface, JsonDeserializeInterface
             chargeId: $data['chargeId'],
             paymentMethod: $data['paymentMethod'],
             paymentType: $data['paymentType'],
-            orderItems: array_map(fn (array $orderItem) => new OrderItem(...$orderItem), $data['orderItems']),
-            amount: new Amount(...$data['amount']),
+            orderItems: array_map(fn (array $orderItem) => OrderItem::fromArray($orderItem), $data['orderItems']),
+            amount: Amount::fromArray($data['amount']),
         );
     }
 }

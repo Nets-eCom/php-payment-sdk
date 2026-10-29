@@ -89,8 +89,8 @@ class RefundInitiated implements WebhookInterface, JsonDeserializeInterface
     {
         return new RefundInitiatedData(
             $data['paymentId'],
-            array_map(fn (array $orderItem): OrderItem => new OrderItem(...$orderItem), $data['orderItems']),
-            new Amount(...$data['amount']),
+            array_map(fn (array $orderItem): OrderItem => OrderItem::fromArray($orderItem), $data['orderItems']),
+            Amount::fromArray($data['amount']),
             $data['reconciliationReference'],
             new \DateTimeImmutable($data['executed']),
             $data['paymentActionId'],

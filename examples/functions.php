@@ -22,8 +22,9 @@ function exampleCreatePaymentApiFactory(): PaymentApiFactory
 
 function exampleCreateOrder(string $reference = 'example-order'): Order
 {
+    $currency = exampleEnv('NEXI_CURRENCY') ?? 'SEK';
     $item = new Item('Example item', 1, 'pcs', 10000, 10000, 10000, 'example-item-1');
-    return new Order([$item], 'SEK', 10000, $reference);
+    return new Order([$item], $currency, 10000, $reference);
 }
 
 function exampleEnv(string $name): ?string

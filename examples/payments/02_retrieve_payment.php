@@ -11,6 +11,11 @@
 
 declare(strict_types=1);
 
+use NexiCheckout\Model\Result\RetrievePayment\PaymentDetails;
+use NexiCheckout\Model\Result\RetrievePayment\Subscription;
+use NexiCheckout\Model\Result\RetrievePayment\UnscheduledSubscription;
+use NexiCheckout\Model\Result\Shared\PaymentTypeEnum;
+
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../functions.php';
 
@@ -33,6 +38,11 @@ exampleWriteLine('Payment ID: ' . $payment->getPaymentId(), 'yellow');
 exampleWriteLine('Status: ' . $payment->getStatus()->value, 'yellow');
 exampleWriteLine('Amount: ' . $orderDetails->getAmount() . ' ' . $orderDetails->getCurrency(), 'yellow');
 exampleWriteLine('Checkout URL: ' . $payment->getCheckout()->getUrl());
+exampleWriteLine('Created: ' . $payment->getCreated()->format(DATE_ATOM));
+
+if ($payment->getCheckout()->getExpiresAt() instanceof \DateTimeInterface) {
+    exampleWriteLine('Checkout expires: ' . $payment->getCheckout()->getExpiresAt()->format(DATE_ATOM));
+}
 
 if ($orderDetails->getReference() !== null) {
     exampleWriteLine('Order reference: ' . $orderDetails->getReference());
@@ -41,6 +51,40 @@ if ($orderDetails->getReference() !== null) {
 if ($payment->getMyReference() !== null) {
     exampleWriteLine('My reference: ' . $payment->getMyReference());
 }
+
+if ($payment->getSubscription() instanceof Subscription) {
+    exampleWriteLine('Subscription ID: ' . $payment->getSubscription()->getId(), 'yellow');
+}
+
+if ($payment->getUnscheduledSubscription() instanceof UnscheduledSubscription) {
+    exampleWriteLine('Unscheduled subscription ID: ' . $payment->getUnscheduledSubscription()->getUnscheduledSubscriptionId(), 'yellow');
+}
+
+if ($payment->getPaymentDetails() instanceof PaymentDetails) {
+    $paymentDetails = $payment->getPaymentDetails();
+
+    if ($paymentDetails->getPaymentMethod() !== null) {
+        exampleWriteLine('Payment method: ' . $paymentDetails->getPaymentMethod());
+    }
+
+    if ($paymentDetails->getPaymentType() instanceof PaymentTypeEnum) {
+        exampleWriteLine('Payment type: ' . $paymentDetails->getPaymentType()->value);
+    }
+
+    if ($paymentDetails->getCardDetails()?->getMaskedPan() !== null) {
+        exampleWriteLine('Card: ' . $paymentDetails->getCardDetails()->getMaskedPan());
+    }
+}
+
+if ($payment->getTerminated() instanceof \DateTimeInterface) {
+    exampleWriteLine('Terminated: ' . $payment->getTerminated()->format(DATE_ATOM));
+}
+
+$summary = $payment->getSummary();
+exampleWriteLine('Reserved amount: ' . $summary->getReservedAmount());
+exampleWriteLine('Charged amount: ' . $summary->getChargedAmount());
+exampleWriteLine('Refunded amount: ' . $summary->getRefundedAmount());
+exampleWriteLine('Cancelled amount: ' . $summary->getCancelledAmount());
 
 if ($payment->getCharges() !== null) {
     exampleWriteLine('Charges on payment: ' . count($payment->getCharges()));
@@ -56,4 +100,4 @@ if ($payment->getRefunds() !== null) {
 exampleWriteLine('Possible next steps:', 'cyan');
 exampleWriteLine('1) If checkout is still open, update metadata: 03_update_reference_information.php, 04_update_order.php, or 05_update_my_reference.php');
 exampleWriteLine('2) If payment is authorized, capture it: 08_charge_payment.php');
-exampleWriteLine('3) If payment is captured, refund it: 09_refund_charge.php or 10_refund_payment.php');
+exampleWriteLine('3) If payment is captured, refund it: 09a_refund_charge.php or 10a_refund_payment.php');

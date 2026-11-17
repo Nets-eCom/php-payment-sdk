@@ -38,7 +38,7 @@ exampleWriteLine('Payment ID: ' . $paymentId, 'yellow');
 exampleWriteLine('Possible next steps:', 'cyan');
 exampleWriteLine('1) Retrieve details: 02_retrieve_payment.php');
 exampleWriteLine('2) Update data before completion: 03_update_reference_information.php, 04_update_order.php, or 05_update_my_reference.php');
-exampleWriteLine('3) Finalize flow after checkout: 08_charge_payment.php, 09_refund_charge.php, or 10_refund_payment.php');
+exampleWriteLine('3) Finalize flow after checkout: 08_charge_payment.php, 09a_refund_charge.php, or 10a_refund_payment.php');
 
 function createHostedPaymentRequest(): Payment
 {

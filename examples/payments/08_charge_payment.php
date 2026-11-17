@@ -46,5 +46,5 @@ if ($idempotencyKey !== null) {
 
 exampleWriteLine('Possible next steps:', 'cyan');
 exampleWriteLine('1) Retrieve payment to inspect charges: 02_retrieve_payment.php');
-exampleWriteLine('2) Refund from charge ID: 09_refund_charge.php');
-exampleWriteLine('3) Refund by payment ID: 10_refund_payment.php');
+exampleWriteLine('2) Full refund from charge ID: 09a_refund_charge.php; partial refund: 09b_partial_refund_charge.php');
+exampleWriteLine('3) Full refund by payment ID: 10a_refund_payment.php; partial refund: 10b_partial_refund_payment.php');

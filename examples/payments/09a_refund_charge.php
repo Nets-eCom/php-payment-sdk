@@ -3,7 +3,9 @@
 /**
  * Refund a charge.
  *
- * Refunds a previously settled transaction in full or in part using the charge ID returned from a charge.
+ * Refunds a previously settled charge using its charge ID. Set NEXI_REFUND_AMOUNT
+ * to the full charged amount for a full refund; use 09b_partial_refund_charge.php
+ * to refund selected order items.
  *
  * Endpoint documentation:
  * https://developer.nexigroup.com/nexi-checkout/en-EU/api/payment-v1/#v1-charges-chargeid-refunds-post

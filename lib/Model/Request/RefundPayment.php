@@ -45,7 +45,7 @@ class RefundPayment implements \JsonSerializable
         }
 
         if ($this->orderItems !== []) {
-            $result['orderItems'] = $this->myReference;
+            $result['orderItems'] = $this->orderItems;
         }
 
         return $result;

@@ -24,6 +24,7 @@ use NexiCheckout\Model\Request\UpdateOrder\Shipping;
 $secretKey = exampleEnv('NEXI_SECRET_KEY') ?? 'your-test-secret-key';
 $liveMode = exampleEnv('NEXI_LIVE_MODE') === 'true';
 $paymentId = exampleEnv('NEXI_PAYMENT_ID') ?? 'your-payment-id';
+$currency = exampleEnv('NEXI_CURRENCY') ?? 'SEK';
 
 // 1) Create payment API client
 $paymentApiFactory = exampleCreatePaymentApiFactory();
@@ -38,7 +39,7 @@ $updateOrderRequest = new UpdateOrder(
     [$updatedItem],
     new Shipping(false),
     [
-        new PaymentMethod('invoice', $invoiceFee),
+        new PaymentMethod('easy-invoice', $invoiceFee),
     ]
 );
 
@@ -47,4 +48,4 @@ $paymentApi->updatePaymentOrder($paymentId, $updateOrderRequest);
 
 exampleWriteLine('Payment order updated.', 'green');
 exampleWriteLine('Payment ID: ' . $paymentId, 'yellow');
-exampleWriteLine('Updated order amount: 10000 SEK', 'yellow');
+exampleWriteLine('Updated order amount: 10000 ' . $currency, 'yellow');
